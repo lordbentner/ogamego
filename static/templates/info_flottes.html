@@ -1,0 +1,21 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="{{url_for('static',filename='bootstrap-4.3.1-dist/css/bootstrap.css')}}">
+<!--<script src="bootstrap-4.3.1-dist\css\bootstrap.min.js"></script>-->
+<link rel="stylesheet" href="{{url_for('static',filename='style.css')}}">
+<title>Ogame Bot</title>
+</head>
+<body>
+<h1 class="text-center"> Mouvement de flottes </h1>
+<div class="card">
+    <table class="table table-bordered table-dark">
+        <thead>
+            <tr>
+                {% for key in  fleets | items() %}
+            </tr>
+        </thead>
+    </table>
+</div>
+</body>
+</html>

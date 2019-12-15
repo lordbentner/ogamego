@@ -1,3 +1,3 @@
 # ogamego
 
-OGameBot
+OGameBot en langage go

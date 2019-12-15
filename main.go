@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/alaingilbert/ogame"
 )
@@ -91,12 +92,11 @@ func launch() GlobalList {
 
 func main() {
 
-	launch()
-	/*http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	http.HandleFunc("/", TestHandler)
+	go launch()
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
-	}*/
+	}
 }
 
 /*s := reflect.ValueOf(&list.planetinfos[0].facilities).Elem()

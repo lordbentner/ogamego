@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"text/template"
 
 	"github.com/alaingilbert/ogame"
 )
@@ -34,7 +35,14 @@ func satProduction(id ogame.PlanetID) {
 	//cenprice := 20 * math.Pow(1.1, float64(fac.SolarPlant))
 	fmt.Print("sattelitte production:")
 	fmt.Println(satprod)
+}
 
+func setresearch(id ogame.CelestialID) {
+	bot.BuildTechnology(id, ogame.AstrophysicsID)
+	bot.BuildTechnology(id, ogame.IntergalacticResearchNetworkID)
+	bot.BuildTechnology(id, ogame.ComputerTechnologyID)
+	bot.BuildTechnology(id, ogame.ShieldingTechnologyID)
+	bot.BuildTechnology(id, ogame.PlasmaTechnologyID)
 }
 
 func gestionGlobal(id ogame.CelestialID) {
@@ -53,9 +61,15 @@ func gestionGlobal(id ogame.CelestialID) {
 		bot.BuildBuilding(id, ogame.DeuteriumSynthesizerID)
 	}
 
-	if fac.ResearchLab < 12 {
-		bot.BuildBuilding(id, ogame.ResearchLabID)
+	if resource.Deuterium > 830.000 && fac.ResearchLab < 1 {
+		bot.BuildDefense(id, ogame.PlasmaTurretID, 1)
+		fmt.Println("build plama...")
 	}
+
+	//fac, _ := bot.GetFacilities(id)
+	/*if fac.ResearchLab < 12 {
+		bot.BuildBuilding(id, ogame.ResearchLabID)
+	}*/
 
 	fmt.Println(res)
 	fmt.Println(resource)
@@ -85,15 +99,25 @@ func launch() GlobalList {
 			fmt.Println(planete.Name)
 			gestionGlobal(id)
 			satProduction(plid)
+			setresearch(id)
 		}
 	}
 
 }
 
+func handler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
+	t, _ := template.ParseFiles("index.html")
+	p := "test"
+
+	t.Execute(w, p)
+}
+
 func main() {
 
 	go launch()
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	//http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	http.HandleFunc("/", handler)
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
 	}

@@ -1,0 +1,4 @@
+package: .
+import:
+- package: github.com/alaingilbert/ogame
+  version: ^26.2.6

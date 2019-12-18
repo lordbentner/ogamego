@@ -44,11 +44,11 @@ func setresearch(id ogame.CelestialID) {
 	bot.BuildTechnology(id, ogame.ShieldingTechnologyID)
 	bot.BuildTechnology(id, ogame.PlasmaTechnologyID)
 	res := bot.GetResearch()
+	bot.BuildTechnology(id, ogame.EspionageTechnologyID)
+	bot.BuildTechnology(id, ogame.CombustionDriveID)
 	if res.EnergyTechnology < 12 {
 		bot.BuildTechnology(id, ogame.EnergyTechnologyID)
 	}
-
-	bot.BuildTechnology(id, ogame.EspionageTechnologyID)
 
 }
 

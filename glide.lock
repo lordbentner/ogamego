@@ -1,0 +1,75 @@
+hash: ec2891fc91f033f01231a399f8630aa52b2f675dd792573a55084802f9cbbb7e
+updated: 2019-12-18T23:11:06.1944901+01:00
+imports:
+- name: github.com/alaingilbert/clockwork
+  version: 7d8eefdb1426118760cc96bc7fd396accc56a5ea
+- name: github.com/alaingilbert/ogame
+  version: b91c93cf84409858a34212e7a50b28aa7dc80b25
+- name: github.com/andybalholm/cascadia
+  version: 903109d295d56a99095f2cfab0c2ca8d4b22f648
+- name: github.com/dustin/go-humanize
+  version: 9f541cc9db5d55bce703bd99987c9d5cb8eea45e
+- name: github.com/go-errors/errors
+  version: d98b870cc4e05f1545532a80e9909be8216095b6
+- name: github.com/google/gxui
+  version: f85e0a97b3a4aafc65be1b86d962a8734cd27bf9
+  subpackages:
+  - math
+- name: github.com/hashicorp/go-version
+  version: 2046c9d0f0b03c779670f5186a2a4b2c85493a71
+- name: github.com/labstack/echo
+  version: 5c7c87d09e23a8943f71f3057030919fb28f1349
+- name: github.com/labstack/gommon
+  version: 4919956f6fb227b548f004da27c7c6b20fba499f
+  subpackages:
+  - color
+  - log
+- name: github.com/mattn/go-colorable
+  version: 98ec13f34aabf44cc914c65a1cfb7b9bc815aef1
+- name: github.com/mattn/go-isatty
+  version: 31745d66dd679ac0ac4f8d3ecff168fce6170c6a
+- name: github.com/mattn/go-runewidth
+  version: 18c3d09a134a52720932bbaa92c798a0ab111004
+- name: github.com/olekukonko/tablewriter
+  version: f8b8fe49672f7ca1a169825af9e45f1fd9e0d053
+- name: github.com/pkg/errors
+  version: 7f95ac13edff643b8ce5398b6ccab125f8a20c1a
+- name: github.com/PuerkitoBio/goquery
+  version: 56ba1e6f0884475d2d9e4c68ec0487351e069335
+- name: github.com/valyala/bytebufferpool
+  version: cdfbe9377474227bb42120c1e22fd4433e7f69bf
+- name: github.com/valyala/fasttemplate
+  version: 8fcc7a99b5795b7c3e95172237cf93282fc339a9
+- name: github.com/yuin/gopher-lua
+  version: 3a10c7c2455ec7d7dd1b8255ac028cb04fa346c4
+  subpackages:
+  - ast
+  - parse
+  - pm
+- name: golang.org/x/crypto
+  version: e9b2fee46413994441b28dfca259d911d963dfed
+  subpackages:
+  - acme
+  - acme/autocert
+- name: golang.org/x/net
+  version: c0dbc17a35534bf2e581d7a942408dc936316da4
+  subpackages:
+  - html
+  - html/atom
+  - idna
+  - internal/socks
+  - proxy
+  - websocket
+- name: golang.org/x/sys
+  version: 4a24b406529242041050cb1dec3e0e4c46a5f1b6
+  subpackages:
+  - unix
+- name: golang.org/x/text
+  version: cbf43d21aaebfdfeb81d91a5f444d13a3046e686
+  subpackages:
+  - runes
+  - secure/bidirule
+  - transform
+  - unicode/bidi
+  - unicode/norm
+testImports: []

@@ -25,7 +25,7 @@ type GlobalList struct {
 }
 
 var isInit bool = false
-var bot, err = ogame.New("Aquarius", "nemesism@hotmail.fr", "pencilcho44", "fr")
+var bot, err = ogame.New("Norma", "nemesism@hotmail.fr", "pencilcho44", "fr")
 
 func satProduction(id ogame.PlanetID) {
 	pl, _ := bot.GetPlanet(id)
@@ -43,6 +43,11 @@ func setresearch(id ogame.CelestialID) {
 	bot.BuildTechnology(id, ogame.ComputerTechnologyID)
 	bot.BuildTechnology(id, ogame.ShieldingTechnologyID)
 	bot.BuildTechnology(id, ogame.PlasmaTechnologyID)
+	/*res := bot.GetResearch()
+	if res.EnergyTechnology < 12 {
+		bot.BuildTechnology(id,)
+	}*/
+
 }
 
 func gestionGlobal(id ogame.CelestialID) {
@@ -54,10 +59,13 @@ func gestionGlobal(id ogame.CelestialID) {
 	if resource.Energy < 0 {
 		bot.BuildBuilding(id, ogame.SolarPlantID)
 	} else if res.MetalMine < res.CrystalMine+4 {
+		bot.BuildBuilding(id, ogame.MetalStorageID)
 		bot.BuildBuilding(id, ogame.MetalMineID)
 	} else if res.CrystalMine < res.DeuteriumSynthesizer+4 {
+		bot.BuildBuilding(id, ogame.CrystalStorageID)
 		bot.BuildBuilding(id, ogame.CrystalMineID)
 	} else {
+		bot.BuildBuilding(id, ogame.DeuteriumTankID)
 		bot.BuildBuilding(id, ogame.DeuteriumSynthesizerID)
 	}
 
@@ -66,10 +74,9 @@ func gestionGlobal(id ogame.CelestialID) {
 		fmt.Println("build plama...")
 	}
 
-	//fac, _ := bot.GetFacilities(id)
-	/*if fac.ResearchLab < 12 {
+	if fac.ResearchLab < 12 {
 		bot.BuildBuilding(id, ogame.ResearchLabID)
-	}*/
+	}
 
 	fmt.Println(res)
 	fmt.Println(resource)

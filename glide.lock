@@ -1,5 +1,5 @@
 hash: ec2891fc91f033f01231a399f8630aa52b2f675dd792573a55084802f9cbbb7e
-updated: 2019-12-18T23:11:06.1944901+01:00
+updated: 2019-12-19T23:43:12.6236779+01:00
 imports:
 - name: github.com/alaingilbert/clockwork
   version: 7d8eefdb1426118760cc96bc7fd396accc56a5ea
@@ -9,6 +9,8 @@ imports:
   version: 903109d295d56a99095f2cfab0c2ca8d4b22f648
 - name: github.com/dustin/go-humanize
   version: 9f541cc9db5d55bce703bd99987c9d5cb8eea45e
+- name: github.com/fatih/structs
+  version: 878a968ab22548362a09bdb3322f98b00f470d46
 - name: github.com/go-errors/errors
   version: d98b870cc4e05f1545532a80e9909be8216095b6
 - name: github.com/google/gxui
@@ -47,7 +49,7 @@ imports:
   - parse
   - pm
 - name: golang.org/x/crypto
-  version: e9b2fee46413994441b28dfca259d911d963dfed
+  version: becbf705a91575484002d598f87d74f0002801e7
   subpackages:
   - acme
   - acme/autocert

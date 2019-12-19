@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/alaingilbert/ogame"
+	"github.com/fatih/structs"
 	"net/http"
 	"text/template"
-
-	"github.com/alaingilbert/ogame"
 )
 
 type PlaneteInfos struct {
@@ -50,12 +50,19 @@ func setresearch(id ogame.CelestialID) {
 		bot.BuildTechnology(id, ogame.EnergyTechnologyID)
 	}
 
+	mresearch := structs.Map(res)
+	fmt.Println(mresearch)
+
 }
 
 func gestionGlobal(id ogame.CelestialID) {
 	res, _ := bot.GetResourcesBuildings(id)
 	resource, _ := bot.GetResources(id)
 	fac, _ := bot.GetFacilities(id)
+	if fac.RoboticsFactory < 10 {
+		bot.BuildBuilding(id, ogame.RoboticsFactoryID)
+	}
+
 	bot.BuildBuilding(id, ogame.NaniteFactoryID)
 	bot.BuildBuilding(id, ogame.TerraformerID)
 	if resource.Energy < 0 {
@@ -80,8 +87,12 @@ func gestionGlobal(id ogame.CelestialID) {
 		bot.BuildBuilding(id, ogame.ResearchLabID)
 	}
 
-	fmt.Println(res)
-	fmt.Println(resource)
+	mres := structs.Map(res)
+	mresource := structs.Map(resource)
+	mfac := structs.Map(fac)
+	fmt.Println(mres)
+	fmt.Println(mresource)
+	fmt.Println(mfac)
 }
 
 func launch() GlobalList {
@@ -131,10 +142,3 @@ func main() {
 		panic(err)
 	}
 }
-
-/*s := reflect.ValueOf(&list.planetinfos[0].facilities).Elem()
-typeOfs := s.Type()
-for i := 0; i < s.NumField(); i++ {
-	f := s.Field(i).Interface()
-	fmt.Println("Niveau " + typeOfs.Field(i).Name + ":" + f)
-}*/

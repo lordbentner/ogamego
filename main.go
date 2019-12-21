@@ -26,7 +26,7 @@ type GlobalList struct {
 }
 
 var isInit bool = false
-var bot, err = ogame.New("Pasiphae", "nemesism@hotmail.fr", "pencilcho44", "fr")
+var bot, err = ogame.New("Janice", "nemesism@hotmail.fr", "pencilcho44", "fr")
 
 func satProduction(id ogame.PlanetID) {
 	pl, _ := bot.GetPlanet(id)
@@ -140,14 +140,14 @@ func launch() GlobalList {
 	for {
 		for _, planete := range planets {
 			id := ogame.CelestialID(planete.ID)
-			plid := planete.ID
+			//plid := planete.ID
 			plinfo.facilities, err = bot.GetFacilities(id)
 			plinfo.resources, err = bot.GetResources(id)
 			plinfo.res_build, err = bot.GetResourcesBuildings(id)
 			list.planetinfos = append(list.planetinfos, plinfo)
 			fmt.Println(planete.Name)
 			gestionGlobal(id)
-			satProduction(plid)
+			//satProduction(plid)
 			setresearch(id)
 		}
 	}
@@ -155,7 +155,6 @@ func launch() GlobalList {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
 	t, _ := template.ParseFiles("index.html")
 	p := "test"
 

@@ -7,11 +7,6 @@ import (
 
 	"github.com/alaingilbert/ogame"
 	"github.com/fatih/structs"
-	buildv1client "github.com/openshift/client-go/build/clientset/versioned/typed/build/v1"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 type PlaneteInfos struct {
@@ -57,16 +52,30 @@ func setresearch(id ogame.CelestialID) {
 	}
 
 	mresearch := structs.Map(res)
-	fmt.Println(mresearch)
+	for k, v := range mresearch {
+		if v.(int64) != 0 {
+			fmt.Println(k, v)
+		}
+	}
 
 }
 
 func gestionGlobal(id ogame.CelestialID) {
+
+	att, _ := bot.IsUnderAttack()
+	if att {
+		fmt.Println("Nous sommes attaqués!!!!")
+	}
+
 	res, _ := bot.GetResourcesBuildings(id)
 	resource, _ := bot.GetResources(id)
 	fac, _ := bot.GetFacilities(id)
 	if fac.RoboticsFactory < 10 {
 		bot.BuildBuilding(id, ogame.RoboticsFactoryID)
+	}
+
+	if fac.Shipyard < 4 {
+		bot.BuildBuilding(id, ogame.ShipyardID)
 	}
 
 	bot.BuildBuilding(id, ogame.NaniteFactoryID)
@@ -96,9 +105,23 @@ func gestionGlobal(id ogame.CelestialID) {
 	mres := structs.Map(res)
 	mresource := structs.Map(resource)
 	mfac := structs.Map(fac)
-	fmt.Println(mres)
-	fmt.Println(mresource)
-	fmt.Println(mfac)
+	for k, v := range mres {
+		if v.(int64) != 0 {
+			fmt.Println(k, v)
+		}
+	}
+
+	for k, v := range mresource {
+		if v.(int64) != 0 {
+			fmt.Println(k, v)
+		}
+	}
+
+	for k, v := range mfac {
+		if v.(int64) != 0 {
+			fmt.Println(k, ":", v)
+		}
+	}
 }
 
 func launch() GlobalList {
@@ -142,7 +165,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	// Instantiate loader for kubeconfig file.
-	kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+	/*kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 		clientcmd.NewDefaultClientConfigLoadingRules(),
 		&clientcmd.ConfigOverrides{},
 	)

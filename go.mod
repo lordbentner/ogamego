@@ -21,6 +21,7 @@ require (
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/labstack/echo v3.3.10+incompatible // indirect
 	github.com/labstack/gommon v0.3.0 // indirect
+	github.com/magiconair/properties v1.8.1 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.11 // indirect
 	github.com/olekukonko/tablewriter v0.0.5-0.20191205072747-f8b8fe49672f // indirect

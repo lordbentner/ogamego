@@ -14,6 +14,7 @@ type PlaneteInfos struct {
 	ships        map[string]interface{}
 	consInBuild  string
 	countInBuild int
+	coord        ogame.Coordinate
 }
 
 //global informations of all in strcut list
@@ -23,6 +24,14 @@ type GlobalList struct {
 	fleets      []ogame.Fleet
 	planetinfos []PlaneteInfos
 	planeteName string
+}
+
+func gestionrapport() {
+	erm, _ := bot.GetEspionageReportMessages()
+	fmt.Print("Rapport d'espionnage:")
+	for _, er := range erm {
+		fmt.Println(bot.GetEspionageReport(er.ID))
+	}
 }
 
 func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
@@ -63,31 +72,68 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 		fmt.Println("build plasma...")
 	}
 
-	if fac.ResearchLab < 12 {
-		bot.BuildBuilding(id, ogame.ResearchLabID)
-	}
-
 	var planetinfo PlaneteInfos
 	planetinfo.res_build = structs.Map(res)
 	planetinfo.resources = structs.Map(resource)
 	planetinfo.facilities = structs.Map(fac)
 	for k, v := range planetinfo.res_build {
 		if v.(int64) != 0 {
-			fmt.Println(k, v)
+			fmt.Print(k, ":", v, ", ")
 		}
 	}
+
+	fmt.Println(" ")
 
 	for k, v := range planetinfo.resources {
 		if v.(int64) != 0 {
-			fmt.Println(k, v)
+			fmt.Print(k, ":", v, ", ")
 		}
 	}
+
+	fmt.Println(" ")
 
 	for k, v := range planetinfo.facilities {
 		if v.(int64) != 0 {
-			fmt.Println(k, ":", v)
+			fmt.Print(k, ":", v, ", ")
 		}
 	}
 
+	fmt.Println(" ")
 	return planetinfo
+}
+
+func setresearch(id ogame.CelestialID) map[string]interface{} {
+	bot.BuildTechnology(id, ogame.AstrophysicsID)
+	bot.BuildTechnology(id, ogame.IntergalacticResearchNetworkID)
+	res := bot.GetResearch()
+	fac, _ := bot.GetFacilities(id)
+	//bot.BuildTechnology(id, ogame.EspionageTechnologyID)
+	bot.BuildTechnology(id, ogame.CombustionDriveID)
+	bot.BuildTechnology(id, ogame.ArmourTechnologyID)
+	if res.EnergyTechnology < 3 {
+		bot.BuildTechnology(id, ogame.EnergyTechnologyID)
+	}
+
+	/*if res.ImpulseDrive < 3 {
+		bot.BuildTechnology(id, ogame.ImpulseDriveID)
+	} else {
+		bot.BuildTechnology(id, ogame.ComputerTechnologyID)
+		bot.BuildTechnology(id, ogame.ShieldingTechnologyID)
+		bot.BuildTechnology(id, ogame.PlasmaTechnologyID)
+	}*/
+
+	if fac.ResearchLab < 6 {
+		bot.BuildBuilding(id, ogame.ResearchLabID)
+	}
+
+	mresearch := structs.Map(res)
+	for k, v := range items.researchs {
+		if v.(int64) != 0 {
+			fmt.Print(k, ":", v, ",")
+		}
+	}
+
+	fmt.Println(" ")
+
+	return mresearch
 }

@@ -13,7 +13,7 @@ type PlaneteInfos struct {
 	res_build    map[string]interface{}
 	ships        map[string]interface{}
 	consInBuild  string
-	countInBuild int
+	countInBuild int64
 	coord        ogame.Coordinate
 }
 
@@ -30,8 +30,24 @@ func gestionrapport() {
 	erm, _ := bot.GetEspionageReportMessages()
 	fmt.Print("Rapport d'espionnage:")
 	for _, er := range erm {
+
 		fmt.Println(bot.GetEspionageReport(er.ID))
 	}
+}
+
+func gestionAttack(id ogame.CelestialID) {
+	ship, _ := bot.GetShips(id)
+	if ship.SmallCargo == 0 {
+		fmt.Println("pas de cargos!!")
+		return
+	}
+
+	var quantList []ogame.Quantifiable
+	q := ogame.Quantifiable{ID: ogame.SmallCargoID, Nbr: ship.SmallCargo}
+	quantList = append(quantList, q)
+	where := ogame.Coordinate{Galaxy: 1, System: 338, Position: 7, Type: ogame.PlanetType}
+	bot.SendFleet(id, quantList, 100, where, ogame.Attack, ogame.Resources{}, 0, 0)
+	//1:338:7
 }
 
 func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
@@ -72,10 +88,13 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 		fmt.Println("build plasma...")
 	}
 
+	consInBuild, countInBuild, _, _ := bot.ConstructionsBeingBuilt(id)
 	var planetinfo PlaneteInfos
 	planetinfo.res_build = structs.Map(res)
 	planetinfo.resources = structs.Map(resource)
 	planetinfo.facilities = structs.Map(fac)
+	planetinfo.consInBuild = string(consInBuild)
+	planetinfo.countInBuild = countInBuild
 	for k, v := range planetinfo.res_build {
 		if v.(int64) != 0 {
 			fmt.Print(k, ":", v, ", ")

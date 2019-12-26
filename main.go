@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"net/http"
-	"text/template"
-
 	"github.com/alaingilbert/ogame"
+	"net/http"
+	"os"
+	"text/template"
 )
 
 var isInit bool = false
-var bot, err = ogame.New("Janice", "nemesism@hotmail.fr", "pencilcho44", "fr")
+var bot, err = ogame.New("Janice", "nemesism@hotmail.fr", os.Args[1], "fr")
 var items GlobalList
 
 func satProduction(id ogame.PlanetID) {
@@ -50,6 +50,8 @@ func launch() {
 			if i == 0 {
 				items.researchs = setresearch(id)
 			}
+
+			gestionAttack(id)
 			i++
 		}
 	}

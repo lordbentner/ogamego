@@ -8,5 +8,6 @@ WORKDIR /go/src/github.com/lordbentner/ogamego
 COPY . /go/src/github.com/lordbentner/ogamego
 #RUN go build
 
+CMD ["sudo","chmod","+x","./main.go"]
 CMD ["./main.go"]
 EXPOSE 8080

@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/alaingilbert/ogame"
+	"math"
 	"net/http"
 	"os"
 	"text/template"
+
+	"github.com/alaingilbert/ogame"
 )
 
 var isInit bool = false
@@ -14,26 +16,23 @@ var items GlobalList
 
 func satProduction(id ogame.PlanetID) {
 	pl, _ := bot.GetPlanet(id)
-	//fac, _ := bot.GetResourcesBuildings(ogame.CelestialID(id))
+	fac, _ := bot.GetResourcesBuildings(ogame.CelestialID(id))
 	temp := pl.Temperature
 	satprod := ogame.SolarSatellite.Production(temp, 1)
-	//cenprice := 20 * math.Pow(1.1, float64(fac.SolarPlant))
+	cenprice := 20 * math.Pow(1.1, float64(fac.SolarPlant))
+	if cenprice > float64(satprod*2000) {
+		pid := ogame.CelestialID(id)
+		bot.BuildShips(pid, ogame.SolarSatelliteID, 1)
+	}
+	//P:1:360:6
 	fmt.Print("sattelitte production:")
 	fmt.Println(satprod)
 }
 
 func launch() {
-	gal, _ := bot.GalaxyInfos(1, 337)
-	var i int64
-	for i = 1; i <= 15; i++ {
-		pos := gal.Position(i)
-		if pos != nil {
-			fmt.Println(pos.Inactive)
-		}
-	}
-
-	gestionrapport()
-
+	var gal int64 = 1
+	var sys int64 = 1
+	bot.GetEspionageReportMessages()
 	for {
 		items.planetes = bot.GetPlanets()
 		items.fleets, _ = bot.GetFleets()
@@ -41,17 +40,30 @@ func launch() {
 		i := 0
 		for _, planete := range items.planetes {
 			id := ogame.CelestialID(planete.ID)
+			gestionUnderAttack(id)
 			plinfo := gestionGlobal(id)
 			plinfo.coord = planete.Coordinate
 			items.planetinfos = append(items.planetinfos, plinfo)
 			items.planeteName = planete.Name
 			fmt.Println(planete.Name)
-			//satProduction(planete.ID)
+			satProduction(planete.ID)
 			if i == 0 {
 				items.researchs = setresearch(id)
 			}
 
-			gestionAttack(id)
+			setShips(id)
+			if sys >= 500 {
+				sys = 1
+				gal++
+			}
+			if gal >= 5 {
+				gal = 1
+			}
+
+			gestionEspionnage(id, gal, sys)
+			gestionrapport(id)
+			//gestionAttack(id)
+			sys++
 			i++
 		}
 	}

@@ -37,6 +37,17 @@ func gestionUnderAttack(id ogame.CelestialID) {
 	}
 }
 
+func setExpedition(id ogame.CelestialID, coord ogame.Coordinate) {
+	sh, _ := bot.GetShips(id)
+	q := ogame.Quantifiable{ID: ogame.EspionageProbeID, Nbr: 10}
+	r := ogame.Quantifiable{ID: ogame.LargeCargoID, Nbr: sh.LargeCargo}
+	co := ogame.Coordinate{Galaxy: coord.Galaxy, System: coord.System, Position: 16}
+	var quantList []ogame.Quantifiable
+	quantList = append(quantList, q)
+	quantList = append(quantList, r)
+	bot.SendFleet(id, quantList, 100, co, ogame.Expedition, ogame.Resources{}, 0, 0)
+}
+
 func attackSpy(id ogame.CelestialID, coord ogame.Coordinate) {
 	q := ogame.Quantifiable{ID: ogame.EspionageProbeID, Nbr: 1}
 	var quantList []ogame.Quantifiable

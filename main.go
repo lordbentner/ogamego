@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 	"text/template"
-
+	//"mime"
 	"github.com/alaingilbert/ogame"
 )
 
@@ -32,7 +32,6 @@ func satProduction(id ogame.PlanetID) {
 func launch() {
 	var gal int64 = 1
 	var sys int64 = 1
-	bot.GetEspionageReportMessages()
 	for {
 		items.planetes = bot.GetPlanets()
 		items.fleets, _ = bot.GetFleets()
@@ -60,6 +59,7 @@ func launch() {
 				gal = 1
 			}
 
+			setExpedition(id, plinfo.coord)
 			gestionEspionnage(id, gal, sys)
 			gestionrapport(id)
 			//gestionAttack(id)
@@ -78,7 +78,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	go launch()
 	http.HandleFunc("/", handler)
-	//	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
 	}

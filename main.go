@@ -5,20 +5,23 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"strconv"
 	"text/template"
-	//"mime"
+
 	"github.com/alaingilbert/ogame"
+	"gopkg.in/macaron.v1"
 )
 
 var isInit bool = false
-var bot, err = ogame.New("Janice", "nemesism@hotmail.fr", os.Args[1], "fr")
+
+var bot, err = ogame.New("Aquarius", os.Args[1], os.Args[2], "fr")
 var items GlobalList
 
 func satProduction(id ogame.PlanetID) {
 	pl, _ := bot.GetPlanet(id)
 	fac, _ := bot.GetResourcesBuildings(ogame.CelestialID(id))
 	temp := pl.Temperature
-	satprod := ogame.SolarSatellite.Production(temp, 1)
+	satprod := ogame.SolarSatellite.Production(temp, 1, true)
 	cenprice := 20 * math.Pow(1.1, float64(fac.SolarPlant))
 	if cenprice > float64(satprod*2000) {
 		pid := ogame.CelestialID(id)
@@ -60,7 +63,7 @@ func launch() {
 			}
 
 			setExpedition(id, plinfo.coord)
-			gestionEspionnage(id, gal, sys)
+			//	gestionEspionnage(id, gal, sys)
 			gestionrapport(id)
 			//gestionAttack(id)
 			sys++
@@ -77,9 +80,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	go launch()
-	http.HandleFunc("/", handler)
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	m := macaron.Classic()
+	m.Get("/", func() string {
+		return "Hello world!"
+	})
+
+	host := os.Getenv("IP")
+	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	m.Run(host, port)
+	if err != nil {
 		panic(err)
 	}
 }

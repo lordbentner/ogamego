@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"math"
+
 	"github.com/alaingilbert/ogame"
 	"github.com/fatih/structs"
-	"math"
 )
 
 type PlaneteInfos struct {
@@ -60,7 +61,7 @@ func gestionrapport(id ogame.CelestialID) {
 	for _, er := range erm {
 		if er.Type == ogame.Report {
 			msgR, _ := bot.GetEspionageReport(er.ID)
-			if msgR.HasFleet == false && msgR.HasDefenses == false && msgR.CounterEspionage == 0 {
+			if msgR.HasFleetInformation == false && msgR.HasDefensesInformation == false && msgR.CounterEspionage == 0 {
 				totalres := msgR.Resources.Metal + msgR.Resources.Crystal + msgR.Resources.Deuterium
 				if totalres > 100000 {
 					hasAttacked := gestionAttack(id, totalres, msgR.Coordinate)
@@ -192,7 +193,7 @@ func setresearch(id ogame.CelestialID) map[string]interface{} {
 	bot.BuildTechnology(id, ogame.IntergalacticResearchNetworkID)
 	res := bot.GetResearch()
 	fac, _ := bot.GetFacilities(id)
-	//bot.BuildTechnology(id, ogame.EspionageTechnologyID)
+	bot.BuildTechnology(id, ogame.EspionageTechnologyID)
 	bot.BuildTechnology(id, ogame.CombustionDriveID)
 	bot.BuildTechnology(id, ogame.ArmourTechnologyID)
 	bot.BuildTechnology(id, ogame.PlasmaTechnologyID)

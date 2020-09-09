@@ -15,7 +15,7 @@ import (
 
 var isInit bool = false
 
-var bot, err = ogame.New("Aquarius", os.Args[1], os.Args[2], "fr")
+var bot, err = ogame.New("Aquarius",  os.Args[1], os.Args[2], "fr")
 var items GlobalList
 
 func satProduction(id ogame.PlanetID) {

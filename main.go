@@ -6,16 +6,27 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"text/template"
-
+	"io/ioutil"
 	"github.com/alaingilbert/ogame"
 	"gopkg.in/macaron.v1"
 	"golang.org/x/mobile/app"
 )
 
 var isInit bool = false
+ var content, err1 = ioutil.ReadFile("login.txt")
 
-var bot, err = ogame.New("Aquarius",  os.Args[1], os.Args[2], "fr")
+     /*if err != nil {
+          fmt.Println(err)
+     }
+
+   fmt.Println(string(content))*/
+var user  = strings.Split(string(content)," ")[0]
+var mdp = strings.Split(string(content)," ")[1]
+
+
+var bot, err = ogame.New("Aquarius", strings.Split(string(content)," ")[0], strings.Split(string(content)," ")[1], "fr")
 var items GlobalList
 
 func satProduction(id ogame.PlanetID) {

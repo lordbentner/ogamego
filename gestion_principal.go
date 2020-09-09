@@ -94,14 +94,14 @@ func gestionEspionnage(id ogame.CelestialID, gal int64, sys int64) {
 }
 
 func setShips(id ogame.CelestialID) {
-	ships, _ := bot.GetShips(id)
+	/*ships, _ := bot.GetShips(id)
 	if ships.EspionageProbe < 10 {
 		bot.BuildShips(id, ogame.EspionageProbe.GetID(), 1)
 	}
 
 	if ships.LargeCargo < 15 {
 		bot.BuildShips(id, ogame.LargeCargoID, 1)
-	}
+	}*/
 }
 
 func gestionAttack(id ogame.CelestialID, resource int64, where ogame.Coordinate) bool {
@@ -193,12 +193,12 @@ func setresearch(id ogame.CelestialID) map[string]interface{} {
 	bot.BuildTechnology(id, ogame.IntergalacticResearchNetworkID)
 	res := bot.GetResearch()
 	fac, _ := bot.GetFacilities(id)
-	bot.BuildTechnology(id, ogame.EspionageTechnologyID)
-	bot.BuildTechnology(id, ogame.CombustionDriveID)
-	bot.BuildTechnology(id, ogame.ArmourTechnologyID)
-	bot.BuildTechnology(id, ogame.PlasmaTechnologyID)
 	if res.EnergyTechnology < 8 {
 		bot.BuildTechnology(id, ogame.EnergyTechnologyID)
+	}
+
+	if res.ImpulseDrive < 4 {
+		bot.BuildTechnology(id, ogame.ImpulseDriveID)
 	}
 
 	if res.LaserTechnology < 10 {
@@ -213,6 +213,11 @@ func setresearch(id ogame.CelestialID) map[string]interface{} {
 		bot.BuildTechnology(id, ogame.IonTechnologyID)
 	}
 
+	bot.BuildTechnology(id, ogame.EspionageTechnologyID)
+	bot.BuildTechnology(id, ogame.CombustionDriveID)
+	bot.BuildTechnology(id, ogame.ArmourTechnologyID)
+	bot.BuildTechnology(id, ogame.PlasmaTechnologyID)
+
 	mresearch := structs.Map(res)
 	for k, v := range items.researchs {
 		if v.(int64) != 0 {
@@ -224,3 +229,4 @@ func setresearch(id ogame.CelestialID) map[string]interface{} {
 
 	return mresearch
 }
+

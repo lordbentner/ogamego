@@ -10,6 +10,7 @@ import (
 
 	"github.com/alaingilbert/ogame"
 	"gopkg.in/macaron.v1"
+	"golang.org/x/mobile/app"
 )
 
 var isInit bool = false
@@ -79,6 +80,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	app.Main(func(a app.App) {
+	if err != nil {
+		panic(err)
+	}
+
 	go launch()
 	m := macaron.Classic()
 	m.Get("/", func() string {
@@ -88,7 +94,5 @@ func main() {
 	host := os.Getenv("IP")
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	m.Run(host, port)
-	if err != nil {
-		panic(err)
-	}
+	})
 }

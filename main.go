@@ -5,8 +5,8 @@ import (
 	"math"
 	"net/http"
 	"os"
-	"strconv"
-	"strings"
+	//"strconv"
+	//"strings"
 	"text/template"
 	"io/ioutil"
 	"github.com/alaingilbert/ogame"
@@ -15,18 +15,9 @@ import (
 )
 
 var isInit bool = false
- var content, err1 = ioutil.ReadFile("login.txt")
+var content, err1 = ioutil.ReadFile("login.txt")
 
-     /*if err != nil {
-          fmt.Println(err)
-     }
-
-   fmt.Println(string(content))*/
-var user  = strings.Split(string(content)," ")[0]
-var mdp = strings.Split(string(content)," ")[1]
-
-
-var bot, err = ogame.New("Aquarius", strings.Split(string(content)," ")[0], strings.Split(string(content)," ")[1], "fr")
+var bot, err = ogame.New("Aquarius", os.Args[1], os.Args[2], "fr")
 var items GlobalList
 
 func satProduction(id ogame.PlanetID) {
@@ -52,20 +43,32 @@ func launch() {
 		items.fleets, _ = bot.GetFleets()
 		items.planetinfos = nil
 		i := 0
+		if len(items.planetes) > len(items.facilities) {
+			items.facilities = make([]map[string]interface{}, len(items.planetes))
+			items.resources = make([]map[string]interface{}, len(items.planetes))
+			items.ships = make([]ogame.ShipsInfos, len(items.planetes))
+			items.res_build = make([]map[string]interface{}, len(items.planetes))
+			items.consInBuild = make([]string, len(items.planetes))
+			items.countInBuild = make([]int64, len(items.planetes))
+		}
+
 		for _, planete := range items.planetes {
+			fmt.Println("Nom de la planéte:",planete.Name)
 			id := ogame.CelestialID(planete.ID)
 			gestionUnderAttack(id)
 			plinfo := gestionGlobal(id)
-			plinfo.coord = planete.Coordinate
-			items.planetinfos = append(items.planetinfos, plinfo)
-			items.planeteName = planete.Name
-			fmt.Println(planete.Name)
+			items.facilities[i] = plinfo.facilities
+			items.resources[i] = plinfo.resources
+			items.ships[i] = plinfo.ships
+			items.res_build[i] = plinfo.res_build
+			items.consInBuild[i] = plinfo.consInBuild
+			items.countInBuild[i] = plinfo.countInBuild
 			satProduction(planete.ID)
 			if i == 0 {
 				items.researchs = setresearch(id)
 			}
 
-			setShips(id)
+			items.ships[i] = setShips(id)
 			if sys >= 500 {
 				sys = 1
 				gal++
@@ -74,7 +77,7 @@ func launch() {
 				gal = 1
 			}
 
-			setExpedition(id, plinfo.coord)
+			setExpedition(id, planete.Coordinate)
 			//	gestionEspionnage(id, gal, sys)
 			gestionrapport(id)
 			//gestionAttack(id)
@@ -92,18 +95,25 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	app.Main(func(a app.App) {
-	if err != nil {
-		panic(err)
-	}
+		go launch()
+		m := macaron.Classic()
+		m.Use(macaron.Renderer())
+		m.Get("/", func(ctx *macaron.Context) {
+			ctx.Data["items"] = items
+			ctx.Data["planetes"] = items.planetes	
+			ctx.Data["researchs"] = items.researchs
+			ctx.Data["facilities"] = items.facilities
+			ctx.Data["resources"] = items.resources
+			ctx.Data["res_build"] = items.res_build
+			ctx.Data["ships"] = items.ships
+			ctx.Data["consInBuild"] = items.consInBuild
+			ctx.Data["countInBuild"] = items.countInBuild
+			ctx.HTML(200,"index")
+			
+		})
 
-	go launch()
-	m := macaron.Classic()
-	m.Get("/", func() string {
-		return "Hello world!"
-	})
-
-	host := os.Getenv("IP")
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	m.Run(host, port)
+		//host := os.Getenv("IP")
+		//port, _ := strconv.Atoi(os.Getenv("PORT"))
+		m.Run("127.0.0.1", "8000")
 	})
 }

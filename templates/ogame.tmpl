@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" href="/css/bootstrap-4.3.1-dist/css/bootstrap.css">
+    <!--<script src="bootstrap-4.3.1-dist\css\bootstrap.min.js"></script>-->
+    <link rel="stylesheet" href="/css/style.css">
+    <title>Ogame Bot</title>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <b>
+    <a class="navbar-brand" href="#">Start</a>
+    <a class="navbar-brand" href="#">Stop</a>
+    <a class="navbar-brand" href="#">Refresh</a>
+    <nav class="navbar-text">
+            <div class="p-3 mb-2 bg-secondary text-white"><b>Connection</b></div>
+            <div class="p-3 mb-2 bg-danger text-white"><b>Connection</b></div>
+    </nav>
+    <nav class="navbar-text">
+            <div class="p-3 mb-2 bg-secondary text-white"><b>Lancement</b></div>
+            <div class="p-3 mb-2 bg-danger text-white"><b>Lancement</b></div>
+    </nav>
+    <a class="navbar-brand" href="#">Log</a>
+    <a class="navbar-brand" href="#">Flottes info</a>
+    <a class="btn btn-danger" href="#">Quitter</a>
+    </b>
+</nav>
+<h4>niveau des recherches</h4>
+<div class="card">
+	<table class="table table-ordered table-dark">
+		<thead>
+			<tr>
+				{{range $k, $v := .researchs }}
+				<th scope="col">{{$k}}</th>
+				{{end}}
+			</tr>
+		</thead>
+		<tbody>
+			<tr>{{range $k, $v := .researchs }}
+				<th scope="col">{{$v}}</th>
+				{{end}}
+			</tr>
+		</tbody>
+	</table>
+<div class="card">
+	<table class="table table-ordered table-dark">
+		<thead>
+			<!--<tr><th scope="col">Planète</th><th scope="col">lvl des ressources</th>
+			<th scope="col">niveaux des installations</th><th scope="col">Vaisseaux</th>
+			<th scope="col">En construction</th> </tr>-->
+		</thead>
+		<tbody>
+			<tr><th scope="row">Planète</th>
+				{{ range .planetes }}
+					<td>{{.Name}}<p>{{.Coordinate}}</td>
+						
+				{{end}}
+			</tr>
+			<tr><th scope="row">niveaux des installations</th>
+				{{range $k, $v := .facilities }}				
+				<td>{{range $key , $val := $v}}
+					{{if ne $val 0}}
+						<p>{{$key}}:{{$val}}</p>
+					{{end}}
+				{{end}}</td>
+			{{end}}
+			</tr>
+			<tr><th scope="row">niveau des ressources</th>
+				{{range $k,$v := .res_build}}
+				<td>{{range $key , $val := $v}}
+					{{if ne $val 0}}
+						<p>{{$key}}:{{$val}}</p>
+					{{end}}
+				{{end}}</td>
+			{{end}}
+			</tr> 
+			<tr><th scope="row">Vaisseaux</th>
+				{{range $k ,$v := .ships}}
+					<td>{{range $key , $val := $v}}
+					{{if ne $val 0}}
+						<p>{{$key}}:{{$val}}</p>
+					{{end}}
+				{{end}}</td>
+			{{end}}
+			</tr>					
+	</table>
+</div>
+
+</body>
+</html>

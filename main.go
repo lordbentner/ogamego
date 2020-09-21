@@ -46,7 +46,7 @@ func launch() {
 		if len(items.planetes) > len(items.facilities) {
 			items.facilities = make([]map[string]interface{}, len(items.planetes))
 			items.resources = make([]map[string]interface{}, len(items.planetes))
-			items.ships = make([]ogame.ShipsInfos, len(items.planetes))
+			items.ships = make([]map[string]interface{}, len(items.planetes))
 			items.res_build = make([]map[string]interface{}, len(items.planetes))
 			items.consInBuild = make([]string, len(items.planetes))
 			items.countInBuild = make([]int64, len(items.planetes))
@@ -59,7 +59,6 @@ func launch() {
 			plinfo := gestionGlobal(id)
 			items.facilities[i] = plinfo.facilities
 			items.resources[i] = plinfo.resources
-			items.ships[i] = plinfo.ships
 			items.res_build[i] = plinfo.res_build
 			items.consInBuild[i] = plinfo.consInBuild
 			items.countInBuild[i] = plinfo.countInBuild
@@ -94,11 +93,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	app.Main(func(a app.App) {
-		go launch()
+	app.Main(func(a app.App) {		
 		m := macaron.Classic()
 		m.Use(macaron.Renderer())
-		m.Get("/", func(ctx *macaron.Context) {
+		m.Get("/",func(ctx *macaron.Context) {
+			ctx.HTML(200,"index")
+		}
+		m.Post("/ogame",binding.Form(LoginUser{}), func(ctx *macaron.Context,login LoginUser) {
+			fmt.Println("User:",login.User,"Password:",login.Password)
+			bot, err = ogame.New("Aquarius",login.User , login.Password, "fr")
+			go launch()
+			ctx.Redirect("/databoard")			
+		})
+		m.Get("/databoard", func(ctx *macaron.Context) {
 			ctx.Data["items"] = items
 			ctx.Data["planetes"] = items.planetes	
 			ctx.Data["researchs"] = items.researchs
@@ -108,12 +115,12 @@ func main() {
 			ctx.Data["ships"] = items.ships
 			ctx.Data["consInBuild"] = items.consInBuild
 			ctx.Data["countInBuild"] = items.countInBuild
-			ctx.HTML(200,"index")
-			
+			ctx.HTML(200,"ogame")			
 		})
 
-		//host := os.Getenv("IP")
-		//port, _ := strconv.Atoi(os.Getenv("PORT"))
+		host := os.Getenv("IP")
+		port, _ := strconv.Atoi(os.Getenv("PORT"))
+		fmt.Println("host:", host, "PORT:" port)
 		m.Run("127.0.0.1", "8000")
 	})
 }

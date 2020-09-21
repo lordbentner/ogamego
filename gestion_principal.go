@@ -17,6 +17,10 @@ type PlaneteInfos struct {
 	countInBuild int64
 }
 
+type Login {
+	User string 'form:"User"'
+	Password string 'form:"Password"'
+}
 
 //global informations of all in struct list
 type GlobalList struct {
@@ -27,7 +31,7 @@ type GlobalList struct {
 	facilities  []map[string]interface{}
 	resources   []map[string]interface{}
 	res_build   []map[string]interface{}
-	ships       []ogame.ShipsInfos
+	ships       []map[string]interface{}
 	consInBuild  []string
 	countInBuild []int64
 }
@@ -98,17 +102,10 @@ func gestionEspionnage(id ogame.CelestialID, gal int64, sys int64) {
 	}
 }
 
-func setShips(id ogame.CelestialID) ogame.ShipsInfos {
+func setShips(id ogame.CelestialID) map[string]interface{} {
 	ships, _ := bot.GetShips(id)
-	/*if ships.EspionageProbe < 10 {
-		bot.BuildShips(id, ogame.EspionageProbe.GetID(), 1)
-	}
-
-	if ships.LargeCargo < 15 {
-		bot.BuildShips(id, ogame.LargeCargoID, 1)
-	}*/
-
-	return ships
+	sh := structs.Map(ships)
+	return sh
 }
 
 func gestionAttack(id ogame.CelestialID, resource int64, where ogame.Coordinate) bool {

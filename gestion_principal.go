@@ -17,21 +17,21 @@ type PlaneteInfos struct {
 	countInBuild int64
 }
 
-type Login {
-	User string 'form:"User"'
-	Password string 'form:"Password"'
+type Login struct {
+	User     string `form:"User"`
+	Password string `form:"Password"`
 }
 
 //global informations of all in struct list
 type GlobalList struct {
-	planetes    []ogame.Planet
-	researchs   map[string]interface{}
-	fleets      []ogame.Fleet
-	planetinfos map[string]PlaneteInfos
-	facilities  []map[string]interface{}
-	resources   []map[string]interface{}
-	res_build   []map[string]interface{}
-	ships       []map[string]interface{}
+	planetes     []ogame.Planet
+	researchs    map[string]interface{}
+	fleets       []ogame.Fleet
+	planetinfos  map[string]PlaneteInfos
+	facilities   []map[string]interface{}
+	resources    []map[string]interface{}
+	res_build    []map[string]interface{}
+	ships        []map[string]interface{}
 	consInBuild  []string
 	countInBuild []int64
 }
@@ -173,7 +173,6 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 	}
 
 	fmt.Println(" ")
-
 	for k, v := range planetinfo.resources {
 		if v.(int64) != 0 {
 			fmt.Print(k, ":", v, ", ")
@@ -230,7 +229,5 @@ func setresearch(id ogame.CelestialID) map[string]interface{} {
 	}
 
 	fmt.Println(" ")
-
 	return mresearch
 }
-

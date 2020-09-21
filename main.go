@@ -5,19 +5,26 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"strconv"
+
 	//"strconv"
 	//"strings"
+
 	"text/template"
-	"io/ioutil"
+
 	"github.com/alaingilbert/ogame"
+	"github.com/go-macaron/binding"
 	"gopkg.in/macaron.v1"
-	"golang.org/x/mobile/app"
+	//"golang.org/x/mobile/app"
 )
 
-var isInit bool = false
-var content, err1 = ioutil.ReadFile("login.txt")
-
-var bot, err = ogame.New("Aquarius", os.Args[1], os.Args[2], "fr")
+//var bot, err = ogame.New("Aquarius", os.Args[1], os.Args[2], "fr")
+var (
+	bot *ogame.OGame
+)
+var (
+	err error
+)
 var items GlobalList
 
 func satProduction(id ogame.PlanetID) {
@@ -53,7 +60,7 @@ func launch() {
 		}
 
 		for _, planete := range items.planetes {
-			fmt.Println("Nom de la planéte:",planete.Name)
+			fmt.Println("Nom de la planéte:", planete.Name)
 			id := ogame.CelestialID(planete.ID)
 			gestionUnderAttack(id)
 			plinfo := gestionGlobal(id)
@@ -93,34 +100,34 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	app.Main(func(a app.App) {		
-		m := macaron.Classic()
-		m.Use(macaron.Renderer())
-		m.Get("/",func(ctx *macaron.Context) {
-			ctx.HTML(200,"index")
-		}
-		m.Post("/ogame",binding.Form(LoginUser{}), func(ctx *macaron.Context,login LoginUser) {
-			fmt.Println("User:",login.User,"Password:",login.Password)
-			bot, err = ogame.New("Aquarius",login.User , login.Password, "fr")
-			go launch()
-			ctx.Redirect("/databoard")			
-		})
-		m.Get("/databoard", func(ctx *macaron.Context) {
-			ctx.Data["items"] = items
-			ctx.Data["planetes"] = items.planetes	
-			ctx.Data["researchs"] = items.researchs
-			ctx.Data["facilities"] = items.facilities
-			ctx.Data["resources"] = items.resources
-			ctx.Data["res_build"] = items.res_build
-			ctx.Data["ships"] = items.ships
-			ctx.Data["consInBuild"] = items.consInBuild
-			ctx.Data["countInBuild"] = items.countInBuild
-			ctx.HTML(200,"ogame")			
-		})
-
-		host := os.Getenv("IP")
-		port, _ := strconv.Atoi(os.Getenv("PORT"))
-		fmt.Println("host:", host, "PORT:" port)
-		m.Run("127.0.0.1", "8000")
+	//app.Main(func(a app.App) {
+	m := macaron.Classic()
+	m.Use(macaron.Renderer())
+	m.Get("/", func(ctx *macaron.Context) {
+		ctx.HTML(200, "index")
 	})
+	m.Post("/ogame", binding.Form(Login{}), func(login Login, ctx *macaron.Context) {
+		fmt.Println("User:", login.User, "Password:", login.Password)
+		bot, err = ogame.New("Aquarius", login.User, login.Password, "fr")
+		go launch()
+		ctx.Redirect("/databoard")
+	})
+	m.Get("/databoard", func(ctx *macaron.Context) {
+		ctx.Data["items"] = items
+		ctx.Data["planetes"] = items.planetes
+		ctx.Data["researchs"] = items.researchs
+		ctx.Data["facilities"] = items.facilities
+		ctx.Data["resources"] = items.resources
+		ctx.Data["res_build"] = items.res_build
+		ctx.Data["ships"] = items.ships
+		ctx.Data["consInBuild"] = items.consInBuild
+		ctx.Data["countInBuild"] = items.countInBuild
+		ctx.HTML(200, "ogame")
+	})
+
+	host := os.Getenv("IP")
+	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	fmt.Println("host:", host, "PORT:", port)
+	m.Run("127.0.0.1", "8000")
+	//})
 }

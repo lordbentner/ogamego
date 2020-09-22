@@ -13,6 +13,7 @@ import (
 	"text/template"
 
 	"github.com/alaingilbert/ogame"
+	"github.com/fatih/structs"
 	"github.com/go-macaron/binding"
 	"gopkg.in/macaron.v1"
 	//"golang.org/x/mobile/app"
@@ -47,7 +48,7 @@ func launch() {
 	var sys int64 = 1
 	for {
 		items.planetes = bot.GetPlanets()
-		items.fleets, _ = bot.GetFleets()
+		fl, _ := bot.GetFleets()
 		items.planetinfos = nil
 		i := 0
 		if len(items.planetes) > len(items.facilities) {
@@ -55,8 +56,9 @@ func launch() {
 			items.resources = make([]map[string]interface{}, len(items.planetes))
 			items.ships = make([]map[string]interface{}, len(items.planetes))
 			items.res_build = make([]map[string]interface{}, len(items.planetes))
-			items.consInBuild = make([]string, len(items.planetes))
+			items.consInBuild = make([]ogame.ID, len(items.planetes))
 			items.countInBuild = make([]int64, len(items.planetes))
+			items.fleets = make([]map[string]interface{}, len(fl))
 		}
 
 		for _, planete := range items.planetes {
@@ -69,6 +71,9 @@ func launch() {
 			items.res_build[i] = plinfo.res_build
 			items.consInBuild[i] = plinfo.consInBuild
 			items.countInBuild[i] = plinfo.countInBuild
+			if len(fl) > i {
+				items.fleets[i] = structs.Map(fl[i])
+			}
 			satProduction(planete.ID)
 			if i == 0 {
 				items.researchs = setresearch(id)
@@ -125,9 +130,18 @@ func main() {
 		ctx.HTML(200, "ogame")
 	})
 
+	m.Get("/flottes", func(ctx *macaron.Context) {
+		ctx.Data["flottes"] = items.fleets
+		ctx.HTML(200, "flottes")
+	})
+
 	host := os.Getenv("IP")
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	if len(host) < 1 {
+		host = "127.0.0.1"
+		port = 8000
+	}
 	fmt.Println("host:", host, "PORT:", port)
-	m.Run("127.0.0.1", "8000")
+	m.Run(host, port)
 	//})
 }

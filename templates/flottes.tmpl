@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" href="/css/bootstrap-4.3.1-dist/css/bootstrap.css">
+    <!--<script src="bootstrap-4.3.1-dist\css\bootstrap.min.js"></script>-->
+    <link rel="stylesheet" href="/css/style.css">
+    <title>Ogame Bot</title>
+</head>
+<body>
+<table class="table table-ordered table-dark">
+    <thead>
+        <tr><th scope="col">Flottes</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>{{range $k, $v := .flottes}}
+                <td>{{range $key, $val := $v}}
+                        {{if eq $key "Ships" }}
+                            {{range $keys, $vals := $val}}
+                                {{if ne $vals 0}}
+                                    <p>{{$keys}}:{{$vals}}</p>
+                                {{end}}
+                            {{end}}
+                        {{end}}
+                    {{end}}
+                </td>                            
+            {{end}}
+        </tr>
+    </tbody>
+</table>
+</body>
+</html>

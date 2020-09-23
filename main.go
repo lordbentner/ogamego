@@ -57,8 +57,15 @@ func launch() {
 			items.ships = make([]map[string]interface{}, len(items.planetes))
 			items.res_build = make([]map[string]interface{}, len(items.planetes))
 			items.consInBuild = make([]ogame.ID, len(items.planetes))
-			items.countInBuild = make([]int64, len(items.planetes))
+			items.countInBuild = make([]int64, len(items.planetes))			
+		}
+
+		if len(items.fleets) < len(fl) {
 			items.fleets = make([]map[string]interface{}, len(fl))
+		}
+
+		for j, fle := range fl {
+			items.fleets[j] = structs.Map(fle)
 		}
 
 		for _, planete := range items.planetes {
@@ -71,9 +78,6 @@ func launch() {
 			items.res_build[i] = plinfo.res_build
 			items.consInBuild[i] = plinfo.consInBuild
 			items.countInBuild[i] = plinfo.countInBuild
-			if len(fl) > i {
-				items.fleets[i] = structs.Map(fl[i])
-			}
 			satProduction(planete.ID)
 			if i == 0 {
 				items.researchs = setresearch(id)
@@ -137,11 +141,11 @@ func main() {
 
 	host := os.Getenv("IP")
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	fmt.Println("host:", host, "PORT:", port)
 	if len(host) < 1 {
 		host = "127.0.0.1"
 		port = 8000
 	}
-	fmt.Println("host:", host, "PORT:", port)
 	m.Run(host, port)
 	//})
 }

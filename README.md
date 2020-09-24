@@ -1,3 +1,7 @@
+#!/bin/bash
+
+./main
+
 # ogamego
 
 OGame est un jeu vidéo de stratégie en temps réel massivement multijoueur par navigateur de réflexion et de stratégie spatiale.

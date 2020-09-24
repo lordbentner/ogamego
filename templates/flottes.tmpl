@@ -10,23 +10,29 @@
 <body>
 <table class="table table-ordered table-dark">
     <thead>
-        <tr><th scope="col">Flottes</th>
+        <tr>
         </tr>
     </thead>
     <tbody>
-        <tr>{{range $k, $v := .flottes}}
-                <td>{{range $key, $val := $v}}
+        <tr>{{range .flottes}}
+                {{range $key, $val := .}}
                         {{if eq $key "Ships" }}
-                            {{range $keys, $vals := $val}}
-                                {{if ne $vals 0}}
-                                    <p>{{$keys}}:{{$vals}}</p>
-                                {{end}}
-                            {{end}}
+				
+                            <td>{{range $keys, $vals := $val}}
+                                	{{if ne $vals 0}}
+                                    <p>{{$keys}}: {{$vals}}</p>
+                                	{{end}}
+                            	{{end}}</td>
                         {{end}}
-                    {{end}}
-                </td>                            
+                {{end}}                           
             {{end}}
         </tr>
+	<tr>{{range .flottes }}
+		<td>{{range $key, $val := . }}
+			<p>{{$key}}:{{$val}}</p>
+			{{end}}
+		</td>
+		{{end}}
     </tbody>
 </table>
 </body>

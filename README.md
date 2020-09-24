@@ -1,6 +1,3 @@
-#!/bin/bash
-
-./main
 
 # ogamego
 

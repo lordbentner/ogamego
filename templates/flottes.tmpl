@@ -10,7 +10,9 @@
 <body>
 <table class="table table-ordered table-dark">
     <thead>
-        <tr>
+        <tr>{{range $key, $val := index .flottes 0}}
+                <th scope="row">{{$key}}</th>
+            {{end}}
         </tr>
     </thead>
     <tbody>

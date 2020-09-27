@@ -16,7 +16,6 @@ import (
 	"github.com/fatih/structs"
 	"github.com/go-macaron/binding"
 	"gopkg.in/macaron.v1"
-	"golang.org/x/mobile/app"
 )
 
 //var bot, err = ogame.New("Aquarius", os.Args[1], os.Args[2], "fr")
@@ -57,7 +56,7 @@ func launch() {
 			items.ships = make([]map[string]interface{}, len(items.planetes))
 			items.res_build = make([]map[string]interface{}, len(items.planetes))
 			items.consInBuild = make([]ogame.ID, len(items.planetes))
-			items.countInBuild = make([]int64, len(items.planetes))			
+			items.countInBuild = make([]int64, len(items.planetes))
 		}
 
 		if len(items.fleets) < len(fl) {
@@ -109,7 +108,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-    app.Main(func(a app.App) {
+	// app.Main(func(a app.App) {
 	m := macaron.Classic()
 	m.Use(macaron.Renderer())
 	m.Get("/", func(ctx *macaron.Context) {
@@ -147,5 +146,5 @@ func main() {
 		port = 8000
 	}
 	m.Run(host, port)
-     })
+	// })
 }

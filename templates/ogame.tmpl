@@ -58,6 +58,13 @@
 						
 				{{end}}
 			</tr>
+			<tr><th scope="row"><h4>Ressources</h4></th>
+				{{range .resources}}
+					<td>{{range $key, $val := .}}
+							<p>{{$key}}: {{$val}}</p>
+						{{end}}
+					</td>
+				{{end}}
 			<tr><th scope="row"><h4>niveaux des <br />installations</h4></th>
 				{{range $k, $v := .facilities }}				
 				<td>{{range $key , $val := $v}}

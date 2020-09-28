@@ -3,14 +3,11 @@ package main
 import (
 	"fmt"
 	"math"
-	"net/http"
 	"os"
 	"strconv"
 
 	//"strconv"
 	//"strings"
-
-	"text/template"
 
 	"github.com/alaingilbert/ogame"
 	"github.com/fatih/structs"
@@ -18,7 +15,6 @@ import (
 	"gopkg.in/macaron.v1"
 )
 
-//var bot, err = ogame.New("Aquarius", os.Args[1], os.Args[2], "fr")
 var (
 	bot *ogame.OGame
 )
@@ -26,6 +22,7 @@ var (
 	err error
 )
 var items GlobalList
+var RapportEspionnage []ogame.EspionageReportSummary
 
 func satProduction(id ogame.PlanetID) {
 	pl, _ := bot.GetPlanet(id)
@@ -38,8 +35,7 @@ func satProduction(id ogame.PlanetID) {
 		bot.BuildShips(pid, ogame.SolarSatelliteID, 1)
 	}
 	//P:1:360:6
-	fmt.Print("sattelitte production:")
-	fmt.Println(satprod)
+	fmt.Println("sattelitte production:", satprod)
 }
 
 func launch() {
@@ -80,6 +76,8 @@ func launch() {
 			satProduction(planete.ID)
 			if i == 0 {
 				items.researchs = setresearch(id)
+			} else {
+				transporter(id, items.planetes[0].Coordinate)
 			}
 
 			items.ships[i] = setShips(id)
@@ -92,19 +90,13 @@ func launch() {
 			}
 
 			setExpedition(id, planete.Coordinate)
-			//	gestionEspionnage(id, gal, sys)
+			//gestionEspionnage(id, gal, sys)
 			gestionrapport(id)
 			//gestionAttack(id)
 			sys++
 			i++
 		}
 	}
-}
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	t, _ := template.ParseFiles("index.html")
-	http.StripPrefix("/static/", http.FileServer(http.Dir("static")))
-	t.Execute(w, items)
 }
 
 func main() {
@@ -136,6 +128,11 @@ func main() {
 	m.Get("/flottes", func(ctx *macaron.Context) {
 		ctx.Data["flottes"] = items.fleets
 		ctx.HTML(200, "flottes")
+	})
+
+	m.Get("/rapports", func(ctx *macaron.Context) {
+		//ctx.Data["spy"] = items.
+		ctx.HTML(200, "rapports")
 	})
 
 	host := os.Getenv("IP")

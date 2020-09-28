@@ -93,8 +93,8 @@
 			{{end}}
 			</tr>
 			<tr><th scope="row"><h4>Temps de <br />constructions<br />/recherches</h4></th>
-				{{range .countInBuild}}						
-					<td>{{.}}</td>
+				{{range $key, $val := .countInBuild}}						
+					<td>{{index $.consInBuild $key}}: {{$val}} sec</td>
 				{{end}}
 			</tr>					
 	</table>

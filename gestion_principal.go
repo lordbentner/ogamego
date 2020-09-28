@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
+	"strings"
 
 	"github.com/alaingilbert/ogame"
 	"github.com/fatih/structs"
@@ -70,16 +71,17 @@ func gestionrapport(id ogame.CelestialID) {
 	for _, er := range erm {
 		if er.Type == ogame.Report {
 			msgR, _ := bot.GetEspionageReport(er.ID)
+			fmt.Println("Rapport espionnage:", structs.Map(msgR))
 			if msgR.HasFleetInformation == false && msgR.HasDefensesInformation == false && msgR.CounterEspionage == 0 {
 				totalres := msgR.Resources.Metal + msgR.Resources.Crystal + msgR.Resources.Deuterium
 				if totalres > 100000 {
 					hasAttacked := gestionAttack(id, totalres, msgR.Coordinate)
 					if hasAttacked {
-						bot.DeleteMessage(er.ID)
+						//bot.DeleteMessage(er.ID)
 					}
 				}
 			} else {
-				bot.DeleteMessage(er.ID)
+				//bot.DeleteMessage(er.ID)
 			}
 		}
 	}
@@ -130,7 +132,7 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 		bot.BuildBuilding(id, ogame.RoboticsFactoryID)
 	}
 
-	if fac.Shipyard < 4 {
+	if fac.Shipyard < 8 {
 		bot.BuildBuilding(id, ogame.ShipyardID)
 	}
 
@@ -152,7 +154,7 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 	coutTerraform := 100000 * math.Pow(2.0, float64(fac.Terraformer))
 	if resource.Deuterium > int64(coutTerraform) && fac.ResearchLab < 1 {
 		bot.BuildDefense(id, ogame.PlasmaTurretID, 1)
-		fmt.Println("build plasma...")
+		fmt.Println("building plasma...")
 	}
 
 	if fac.SpaceDock < 7 {
@@ -166,28 +168,6 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 	planetinfo.facilities = structs.Map(fac)
 	planetinfo.consInBuild = consInBuild
 	planetinfo.countInBuild = countInBuild
-	for k, v := range planetinfo.res_build {
-		if v.(int64) != 0 {
-			fmt.Print(k, ":", v, ", ")
-		}
-	}
-
-	fmt.Println(" ")
-	for k, v := range planetinfo.resources {
-		if v.(int64) != 0 {
-			fmt.Print(k, ":", v, ", ")
-		}
-	}
-
-	fmt.Println(" ")
-
-	for k, v := range planetinfo.facilities {
-		if v.(int64) != 0 {
-			fmt.Print(k, ":", v, ", ")
-		}
-	}
-
-	fmt.Println(" ")
 	return planetinfo
 }
 
@@ -216,18 +196,46 @@ func setresearch(id ogame.CelestialID) map[string]interface{} {
 		bot.BuildTechnology(id, ogame.IonTechnologyID)
 	}
 
+	if res.HyperspaceTechnology < 8 {
+		bot.BuildTechnology(id, ogame.HyperspaceTechnologyID)
+	}
+
 	bot.BuildTechnology(id, ogame.EspionageTechnologyID)
 	bot.BuildTechnology(id, ogame.CombustionDriveID)
 	bot.BuildTechnology(id, ogame.ArmourTechnologyID)
 	bot.BuildTechnology(id, ogame.PlasmaTechnologyID)
+	bot.BuildTechnology(id, ogame.PlasmaTechnologyID)
+	bot.BuildTechnology(id, ogame.WeaponsTechnologyID)
+	bot.BuildTechnology(id, ogame.ShieldingTechnology.ID)
 
-	mresearch := structs.Map(res)
+	//mresearch := structs.Map(res)
+	mr := make(map[string]interface{})
 	for k, v := range items.researchs {
 		if v.(int64) != 0 {
-			fmt.Print(k, ":", v, ",")
+			//fmt.Print(k, ":", v, ",")
+			mr[strings.Replace(k, "Technology", "", -1)] = v
 		}
 	}
 
 	fmt.Println(" ")
-	return mresearch
+	return mr
+}
+
+func transporter(id ogame.CelestialID, idwhere ogame.Coordinate) {
+	ships, _ := bot.GetShips(id)
+	if ships.LargeCargo < 5 {
+		return
+	}
+	res, _ := bot.GetResources(id)
+	fac, _ := bot.GetFacilities(id)
+	if res.Deuterium > (100000*fac.Terraformer + 100000) {
+		q := ogame.Quantifiable{ID: ogame.LargeCargoID, Nbr: 5}
+		var quantList []ogame.Quantifiable
+		quantList = append(quantList, q)
+		co := ogame.Coordinate{Galaxy: idwhere.Galaxy, System: idwhere.System,
+			Position: idwhere.Position}
+		bot.SendFleet(id, quantList, 100, co, ogame.Transport,
+			ogame.Resources{Deuterium: 100000}, 0, 0)
+		fmt.Println("transport de déuterium vers:", idwhere)
+	}
 }

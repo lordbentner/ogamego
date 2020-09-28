@@ -19,7 +19,7 @@
     <a class="btn btn-danger" href="#">Quitter</a>
     </b>
 </nav>
-<h2>Infos des flottes en cours</h2>
+<h2>Nombre et infos des flottes en cours: {{ len .flottes}}</h2>
 <table class="table table-ordered table-dark">
     <thead>
         <tr>{{if gt (len .flottes) 0}}

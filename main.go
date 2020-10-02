@@ -22,7 +22,7 @@ var (
 	err error
 )
 var items GlobalList
-var RapportEspionnage []ogame.EspionageReportSummary
+var RapportEspionnage []map[string]interface{}
 
 func satProduction(id ogame.PlanetID) {
 	pl, _ := bot.GetPlanet(id)
@@ -40,7 +40,7 @@ func satProduction(id ogame.PlanetID) {
 
 func launch() {
 	var gal int64 = 1
-	var sys int64 = 1
+	var sys int64 = 100
 	for {
 		items.planetes = bot.GetPlanets()
 		fl, _ := bot.GetFleets()
@@ -108,12 +108,17 @@ func main() {
 	})
 	m.Post("/ogame", binding.Form(Login{}), func(login Login, ctx *macaron.Context) {
 		fmt.Println("User:", login.User, "Password:", login.Password)
-		bot, err = ogame.New("Aquarius", login.User, login.Password, "fr")
-		go launch()
-		ctx.Redirect("/databoard")
+		if login.Universe == "" || login.User == "" || login.Password == "" {
+			ctx.Redirect("/")
+		} else {
+			bot, err = ogame.New(login.Universe, login.User, login.Password, "fr")
+			go launch()
+			ctx.Redirect("/databoard")
+		}
 	})
 	m.Get("/databoard", func(ctx *macaron.Context) {
-		ctx.Data["items"] = items
+		MapItems := structs.Map(items)
+		ctx.Data["items"] = MapItems
 		ctx.Data["planetes"] = items.planetes
 		ctx.Data["researchs"] = items.researchs
 		ctx.Data["facilities"] = items.facilities
@@ -122,6 +127,8 @@ func main() {
 		ctx.Data["ships"] = items.ships
 		ctx.Data["consInBuild"] = items.consInBuild
 		ctx.Data["countInBuild"] = items.countInBuild
+		ctx.Data["resInBuild"] = items.researchInBuild
+		ctx.Data["countResInBuild"] = items.countResearchBuild
 		ctx.HTML(200, "ogame")
 	})
 
@@ -131,7 +138,7 @@ func main() {
 	})
 
 	m.Get("/rapports", func(ctx *macaron.Context) {
-		//ctx.Data["spy"] = items.
+		ctx.Data["spy"] = RapportEspionnage
 		ctx.HTML(200, "rapports")
 	})
 

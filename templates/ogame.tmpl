@@ -15,13 +15,11 @@
     <a class="navbar-brand" href="#">Refresh</a>
     <nav class="navbar-text">
             <div class="p-3 mb-2 bg-secondary text-white"><b>Connection</b></div>
-            <div class="p-3 mb-2 bg-danger text-white"><b>Connection</b></div>
     </nav>
     <nav class="navbar-text">
             <div class="p-3 mb-2 bg-secondary text-white"><b>Lancement</b></div>
-            <div class="p-3 mb-2 bg-danger text-white"><b>Lancement</b></div>
     </nav>
-    <a class="navbar-brand" href="#">Log</a>
+    <a class="navbar-brand" href="/rapports">Rapport</a>
     <a class="navbar-brand" href="/flottes">Flottes info</a>
     <a class="btn btn-danger" href="#">Quitter</a>
     </b>
@@ -32,30 +30,26 @@
 		<thead>
 			<tr>
 				{{range $k, $v := .researchs }}
-					{{if ne $v 0}}
 						<th scope="col">{{$k}}</th>
-					{{end}}
 				{{end}}
 			</tr>
 		</thead>
 		<tbody>
 			<tr>{{range $k, $v := .researchs }}
-					{{if ne $v 0}}
-						<th scope="col">{{$v}}</th>
-					{{end}}
+						<td scope="col">{{$v}}</td>
 				{{end}}
 			</tr>
+			<tr><td><h5>Recherche en cours</h5> </td><td><b>{{.resInBuild}}:</b> {{.countResInBuild}} sec</td> </tr>
 		</tbody>
 	</table>
 <div class="card">
 	<table class="table table-ordered table-dark">
-		<thead>
+		<thead>				
 		</thead>
 		<tbody>
 			<tr><th scope="row"><h4>Planète</h4></th>
 				{{ range .planetes }}
-					<td><b>{{.Name}}</b><p>{{.Coordinate}}</p></td>
-						
+					<td><b>{{.Name}}</b><p>{{.Coordinate}}</p></td>					
 				{{end}}
 			</tr>
 			<tr><th scope="row"><h4>Ressources</h4></th>

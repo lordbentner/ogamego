@@ -19,22 +19,25 @@ type PlaneteInfos struct {
 }
 
 type Login struct {
+	Universe string `form:"Universe"`
 	User     string `form:"User"`
 	Password string `form:"Password"`
 }
 
 //global informations of all in struct list
 type GlobalList struct {
-	planetes     []ogame.Planet
-	researchs    map[string]interface{}
-	fleets       []map[string]interface{}
-	planetinfos  map[string]PlaneteInfos
-	facilities   []map[string]interface{}
-	resources    []map[string]interface{}
-	res_build    []map[string]interface{}
-	ships        []map[string]interface{}
-	consInBuild  []ogame.ID
-	countInBuild []int64
+	planetes           []ogame.Planet
+	researchs          map[string]interface{}
+	fleets             []map[string]interface{}
+	planetinfos        map[string]PlaneteInfos
+	facilities         []map[string]interface{}
+	resources          []map[string]interface{}
+	res_build          []map[string]interface{}
+	ships              []map[string]interface{}
+	consInBuild        []ogame.ID
+	countInBuild       []int64
+	researchInBuild    ogame.ID
+	countResearchBuild int64
 }
 
 func gestionUnderAttack(id ogame.CelestialID) {
@@ -68,11 +71,42 @@ func attackSpy(id ogame.CelestialID, coord ogame.Coordinate) {
 
 func gestionrapport(id ogame.CelestialID) {
 	erm, _ := bot.GetEspionageReportMessages()
+	if len(RapportEspionnage) > len(erm) {
+		RapportEspionnage = make([]map[string]interface{}, len(erm))
+	}
+
 	for _, er := range erm {
 		if er.Type == ogame.Report {
 			msgR, _ := bot.GetEspionageReport(er.ID)
-			fmt.Println("Rapport espionnage:", structs.Map(msgR))
-			if msgR.HasFleetInformation == false && msgR.HasDefensesInformation == false && msgR.CounterEspionage == 0 {
+			re := structs.Map(msgR)
+			if msgR.HasDefensesInformation == false || msgR.HasFleetInformation == false {
+				return
+			}
+
+			if msgR.Resources.Deuterium+msgR.Resources.Metal+msgR.Resources.Crystal < 100000 {
+				return
+			}
+
+			RapportEspionnage = append(RapportEspionnage, re)
+			fmt.Println("Rapport d'espionnage de ", msgR.Username, ":")
+			di := structs.Map(msgR.ShipsInfos())
+			fmt.Println("Dfenses Infos:", di)
+			for k, nbfl := range di {
+				if nbfl.(int64) > 0 && !strings.Contains(k, "Solar") && !strings.Contains(k, "Probe") {
+					fmt.Println("Vaisseaux detectes!!")
+					return
+				}
+			}
+
+			df := structs.Map(msgR.DefensesInfos())
+			fmt.Println("Dfenses Infos:", df)
+			for k, nbdef := range df {
+				if nbdef.(int64) > 0 && !strings.Contains(k, "Missiles") {
+					fmt.Println("defense detectes!!")
+					return
+				}
+			}
+			/*if re["HasFleetInformation"] == false && msgR.HasDefensesInformation == false && msgR.CounterEspionage == 0 {
 				totalres := msgR.Resources.Metal + msgR.Resources.Crystal + msgR.Resources.Deuterium
 				if totalres > 100000 {
 					hasAttacked := gestionAttack(id, totalres, msgR.Coordinate)
@@ -82,7 +116,7 @@ func gestionrapport(id ogame.CelestialID) {
 				}
 			} else {
 				//bot.DeleteMessage(er.ID)
-			}
+			}*/
 		}
 	}
 }
@@ -161,13 +195,15 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 		bot.BuildBuilding(id, ogame.SpaceDockID)
 	}
 
-	consInBuild, countInBuild, _, _ := bot.ConstructionsBeingBuilt(id)
+	consInBuild, countInBuild, resinbuild, countresbuild := bot.ConstructionsBeingBuilt(id)
 	var planetinfo PlaneteInfos
 	planetinfo.res_build = structs.Map(res)
 	planetinfo.resources = structs.Map(resource)
 	planetinfo.facilities = structs.Map(fac)
 	planetinfo.consInBuild = consInBuild
 	planetinfo.countInBuild = countInBuild
+	items.researchInBuild = resinbuild
+	items.countResearchBuild = countresbuild
 	return planetinfo
 }
 
@@ -207,17 +243,14 @@ func setresearch(id ogame.CelestialID) map[string]interface{} {
 	bot.BuildTechnology(id, ogame.PlasmaTechnologyID)
 	bot.BuildTechnology(id, ogame.WeaponsTechnologyID)
 	bot.BuildTechnology(id, ogame.ShieldingTechnology.ID)
-
-	//mresearch := structs.Map(res)
+	mresearch := structs.Map(res)
 	mr := make(map[string]interface{})
-	for k, v := range items.researchs {
+	for k, v := range mresearch {
 		if v.(int64) != 0 {
-			//fmt.Print(k, ":", v, ",")
 			mr[strings.Replace(k, "Technology", "", -1)] = v
 		}
 	}
 
-	fmt.Println(" ")
 	return mr
 }
 

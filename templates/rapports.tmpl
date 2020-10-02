@@ -14,10 +14,38 @@
         <div class="p-3 mb-2 bg-secondary text-white"><b>Connection</b></div>
         <div class="p-3 mb-2 bg-danger text-white"><b>Connection</b></div>
     </nav>
-    <a class="navbar-brand" href="#">Log</a>
+    <a class="navbar-brand" href="/flottes">Flottes</a>
     <a class="navbar-brand" href="/databoard">Tableau de bord</a>
     <a class="btn btn-danger" href="#">Quitter</a>
     </b>
 </nav>
+<h2>Nombre et infos des rapport: {{ len .spy}}</h2>
+<table class="table table-ordered table-dark">
+    <thead>
+        <tr>{{if gt (len .spy) 1}}
+                {{range $k, $v := index .spy 1}}
+                    {{if $v}}
+                        <th scope="row">{{$k}}</th>
+                    {{end}}
+                {{end}}
+            {{end}}
+        </tr>
+    </thead>
+    <tbody>
+        {{range .spy}}
+            <tr>
+                {{range $k,$v := .}}
+                    {{if eq (printf "%T" $v) "map[string]interface {}"}}
+                        <td>{{range $key,$val := $v}}
+                                <p>{{$key}}: {{$val}}</p>
+                            {{end}}
+                        </td>
+                    {{else if $v}}
+                        <td>{{$v}}</td>
+                    {{end}}
+                {{end}}
+            </tr>
+        {{end}}
+    </tbody>
 </body>
 </html>

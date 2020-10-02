@@ -40,7 +40,7 @@ func satProduction(id ogame.PlanetID) {
 
 func launch() {
 	var gal int64 = 1
-	var sys int64 = 100
+	var sys int64 = 129
 	for {
 		items.planetes = bot.GetPlanets()
 		fl, _ := bot.GetFleets()
@@ -90,10 +90,13 @@ func launch() {
 			}
 
 			setExpedition(id, planete.Coordinate)
-			//gestionEspionnage(id, gal, sys)
-			gestionrapport(id)
-			//gestionAttack(id)
-			sys++
+			comput := items.researchs["Computer"].(int64)
+			if len(fl) < int(comput) {
+				gestionEspionnage(id, gal, sys)
+				gestionrapport(id)
+				sys++
+			}
+
 			i++
 		}
 	}
@@ -107,7 +110,6 @@ func main() {
 		ctx.HTML(200, "index")
 	})
 	m.Post("/ogame", binding.Form(Login{}), func(login Login, ctx *macaron.Context) {
-		fmt.Println("User:", login.User, "Password:", login.Password)
 		if login.Universe == "" || login.User == "" || login.Password == "" {
 			ctx.Redirect("/")
 		} else {

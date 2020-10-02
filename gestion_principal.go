@@ -79,21 +79,19 @@ func gestionrapport(id ogame.CelestialID) {
 		if er.Type == ogame.Report {
 			msgR, _ := bot.GetEspionageReport(er.ID)
 			re := structs.Map(msgR)
-			if msgR.HasDefensesInformation == false || msgR.HasFleetInformation == false {
+			totalres := msgR.Resources.Deuterium + msgR.Resources.Metal + msgR.Resources.Crystal
+			if msgR.HasDefensesInformation == false || msgR.HasFleetInformation == false || totalres < 150000 {
+				bot.DeleteMessage(er.ID)
 				return
 			}
 
-			if msgR.Resources.Deuterium+msgR.Resources.Metal+msgR.Resources.Crystal < 100000 {
-				return
-			}
-
-			RapportEspionnage = append(RapportEspionnage, re)
 			fmt.Println("Rapport d'espionnage de ", msgR.Username, ":")
 			di := structs.Map(msgR.ShipsInfos())
-			fmt.Println("Dfenses Infos:", di)
+			fmt.Println("Flottes Infos:", di)
 			for k, nbfl := range di {
 				if nbfl.(int64) > 0 && !strings.Contains(k, "Solar") && !strings.Contains(k, "Probe") {
 					fmt.Println("Vaisseaux detectes!!")
+					bot.DeleteMessage(er.ID)
 					return
 				}
 			}
@@ -103,20 +101,16 @@ func gestionrapport(id ogame.CelestialID) {
 			for k, nbdef := range df {
 				if nbdef.(int64) > 0 && !strings.Contains(k, "Missiles") {
 					fmt.Println("defense detectes!!")
+					bot.DeleteMessage(er.ID)
 					return
 				}
 			}
-			/*if re["HasFleetInformation"] == false && msgR.HasDefensesInformation == false && msgR.CounterEspionage == 0 {
-				totalres := msgR.Resources.Metal + msgR.Resources.Crystal + msgR.Resources.Deuterium
-				if totalres > 100000 {
-					hasAttacked := gestionAttack(id, totalres, msgR.Coordinate)
-					if hasAttacked {
-						//bot.DeleteMessage(er.ID)
-					}
-				}
-			} else {
-				//bot.DeleteMessage(er.ID)
-			}*/
+
+			hasAttacked := gestionAttack(id, totalres, msgR.Coordinate)
+			RapportEspionnage = append(RapportEspionnage, re)
+			if hasAttacked {
+				bot.DeleteMessage(er.ID)
+			}
 		}
 	}
 }

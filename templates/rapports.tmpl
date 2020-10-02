@@ -22,13 +22,9 @@
 <h2>Nombre et infos des rapport: {{ len .spy}}</h2>
 <table class="table table-ordered table-dark">
     <thead>
-        <tr>{{if gt (len .spy) 1}}
-                {{range $k, $v := index .spy 1}}
-                    {{if $v}}
-                        <th scope="row">{{$k}}</th>
-                    {{end}}
-                {{end}}
-            {{end}}
+        <tr>
+            <th scope="row">Coordonnées</th>
+            <th scope="row">Ressources</th>
         </tr>
     </thead>
     <tbody>
@@ -40,8 +36,6 @@
                                 <p>{{$key}}: {{$val}}</p>
                             {{end}}
                         </td>
-                    {{else if $v}}
-                        <td>{{$v}}</td>
                     {{end}}
                 {{end}}
             </tr>

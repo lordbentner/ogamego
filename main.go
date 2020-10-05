@@ -3,11 +3,10 @@ package main
 import (
 	"fmt"
 	"math"
+	"net/http"
 	"os"
 	"strconv"
-
-	//"strconv"
-	//"strings"
+	"text/template"
 
 	"github.com/alaingilbert/ogame"
 	"github.com/fatih/structs"
@@ -34,13 +33,11 @@ func satProduction(id ogame.PlanetID) {
 		pid := ogame.CelestialID(id)
 		bot.BuildShips(pid, ogame.SolarSatelliteID, 1)
 	}
-	//P:1:360:6
-	fmt.Println("sattelitte production:", satprod)
 }
 
 func launch() {
-	var gal int64 = 1
-	var sys int64 = 129
+	var gal int64 = 3
+	var sys int64 = 19
 	for {
 		items.planetes = bot.GetPlanets()
 		fl, _ := bot.GetFleets()
@@ -64,7 +61,6 @@ func launch() {
 		}
 
 		for _, planete := range items.planetes {
-			fmt.Println("Nom de la planéte:", planete.Name)
 			id := ogame.CelestialID(planete.ID)
 			gestionUnderAttack(id)
 			plinfo := gestionGlobal(id)
@@ -102,6 +98,11 @@ func launch() {
 	}
 }
 
+func tem(letter string) {
+	t := template.Must(template.New("letter").Parse(letter))
+	fmt.Println(t)
+}
+
 func main() {
 	// app.Main(func(a app.App) {
 	m := macaron.Classic()
@@ -134,8 +135,22 @@ func main() {
 		ctx.HTML(200, "ogame")
 	})
 
-	m.Get("/flottes", func(ctx *macaron.Context) {
+	m.Get("/flottes", func(ctx *macaron.Context, req *http.Request) {
+		page, ok := req.URL.Query()["page"]
+		ctx.Data["fElem"] = 0
+		ctx.Data["lElem"] = 5
+		if ok && len(page[0]) > 0 {
+			el, _ := strconv.Atoi(page[0])
+			ctx.Data["fElem"] = (el - 1) * 5
+			ctx.Data["lElem"] = el * 5
+		}
 		ctx.Data["flottes"] = items.fleets
+		var nbPages []int
+		for i := 0; i < int(math.Floor(float64(len(items.fleets)/5))); i++ {
+			nbPages = append(nbPages, i+1)
+		}
+
+		ctx.Data["nbPages"] = nbPages
 		ctx.HTML(200, "flottes")
 	})
 

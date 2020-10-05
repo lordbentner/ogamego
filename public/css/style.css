@@ -9,3 +9,17 @@
     height: 50px;
     background-color: greenyellow;
 }
+
+.ogame {
+    background-image: url("/images/imagescroiseur.jpg");
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
+.flottes {
+    background-image: url("/images/ogame-test.png");
+    background-repeat: no-repeat;
+    background-size: 100%;
+    width: 100%;
+    height: 100%;
+}

@@ -29,16 +29,18 @@
     </thead>
     <tbody>
         {{range .spy}}
+            {{ if . }}
             <tr>
-                {{range $k,$v := .}}
-                    {{if eq (printf "%T" $v) "map[string]interface {}"}}
-                        <td>{{range $key,$val := $v}}
-                                <p>{{$key}}: {{$val}}</p>
-                            {{end}}
-                        </td>
+                <td>{{range $key,$val := .Coordinate }}
+                        <p>{{$key}}: {{$val}}</p>
                     {{end}}
-                {{end}}
+                </td>
+                <td>{{range $key,$val := .Resources }}
+                        <p>{{$key}}: {{$val}}</p>
+                    {{end}}
+                </td>
             </tr>
+            {{end}}
         {{end}}
     </tbody>
 </body>

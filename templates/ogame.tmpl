@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/css/style.css">
     <title>Ogame Bot</title>
 </head>
-<body>
+<body class="ogame">
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <b>
     <a class="navbar-brand" href="#">Start</a>
@@ -90,7 +90,8 @@
 				{{range $key, $val := .countInBuild}}						
 					<td>{{index $.consInBuild $key}}: {{$val}} sec</td>
 				{{end}}
-			</tr>					
+			</tr>
+							
 	</table>
 </div>
 </body>

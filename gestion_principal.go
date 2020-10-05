@@ -85,9 +85,7 @@ func gestionrapport(id ogame.CelestialID) {
 				return
 			}
 
-			fmt.Println("Rapport d'espionnage de ", msgR.Username, ":")
 			di := structs.Map(msgR.ShipsInfos())
-			fmt.Println("Flottes Infos:", di)
 			for k, nbfl := range di {
 				if nbfl.(int64) > 0 && !strings.Contains(k, "Solar") && !strings.Contains(k, "Probe") {
 					fmt.Println("Vaisseaux detectes!!")
@@ -97,10 +95,28 @@ func gestionrapport(id ogame.CelestialID) {
 			}
 
 			df := structs.Map(msgR.DefensesInfos())
-			fmt.Println("Dfenses Infos:", df)
 			for k, nbdef := range df {
 				if nbdef.(int64) > 0 && !strings.Contains(k, "Missiles") {
 					fmt.Println("defense detectes!!")
+					bot.DeleteMessage(er.ID)
+					return
+				}
+			}
+
+			for _, fleet := range items.fleets {
+				var coord [3]int64
+				flee, _ := fleet["destination"].([]interface{})
+				for i, dest := range flee {
+					if i == 3 {
+						break
+					}
+					coord[i] = dest.(int64)
+					i++
+				}
+
+				fmt.Println("cord de:", coord, "  msgR.Coordinate:", msgR.Coordinate)
+				if coord[0] == msgR.Coordinate.Galaxy && coord[2] == msgR.Coordinate.System &&
+					coord[1] == msgR.Coordinate.Position {
 					bot.DeleteMessage(er.ID)
 					return
 				}
@@ -125,7 +141,6 @@ func gestionEspionnage(id ogame.CelestialID, gal int64, sys int64) {
 			if pos.Inactive == true {
 				q := ogame.Quantifiable{ID: ogame.EspionageProbeID, Nbr: 30}
 				quantList = append(quantList, q)
-				fmt.Println("Coordinate:", pos.Coordinate)
 				bot.SendFleet(id, quantList, 100, pos.Coordinate, ogame.Spy, ogame.Resources{}, 0, 0)
 			}
 		}

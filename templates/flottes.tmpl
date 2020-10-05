@@ -3,50 +3,63 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link rel="stylesheet" href="/css/bootstrap-4.3.1-dist/css/bootstrap.css">
-    <!--<script src="bootstrap-4.3.1-dist\css\bootstrap.min.js"></script>-->
     <link rel="stylesheet" href="/css/style.css">
     <title>Ogame Bot</title>
 </head>
-<body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <b>
-    <nav class="navbar-text">
-        <div class="p-3 mb-2 bg-secondary text-white"><b>Connection</b></div>
-        <div class="p-3 mb-2 bg-danger text-white"><b>Connection</b></div>
+<body class="flottes">
+    <nav>
+        <b>
+            <nav class="navbar-text">
+                <div class="p-3 mb-2 bg-secondary text-white"><b>Connection</b></div>
+                <div class="p-3 mb-2 bg-danger text-white"><b>Connection</b></div>
+            </nav>
+            <a class="navbar-brand" href="/rapports">Rapports</a>
+            <a class="navbar-brand" href="/databoard">Tableau de bord</a>
+            <a class="btn btn-danger" href="#">Quitter</a>
+        </b>
     </nav>
-    <a class="navbar-brand" href="/rapports">Rapports</a>
-    <a class="navbar-brand" href="/databoard">Tableau de bord</a>
-    <a class="btn btn-danger" href="#">Quitter</a>
-    </b>
-</nav>
-<h2>Nombre et infos des flottes en cours: {{ len .flottes}}</h2>
-<table class="table table-ordered table-dark">
-    <thead>
-        <tr>{{if gt (len .flottes) 0}}
-                {{range $key, $val := index .flottes 0}}
-                    <th scope="row">{{$key}}</th>
-                {{end}}
-            {{end}}
-        </tr>
-    </thead>
-    <tbody>
-        {{range .flottes}}
-            <tr>
-                {{range $key, $val := .}}
-                    {{if eq (printf "%T" $val) "map[string]interface {}"}}		
-                            <td>{{range $keys, $vals := $val}}
-                                	{{if ne $vals 0}}
-                                        <p><u>{{$keys}}</u>: {{$vals}}</p>
-                                	{{end}}
-                            	{{end}}
-                            </td>
-                    {{else}}
-                        <td>{{.}}</td>
+    <div class="card text-center border border-primary">
+        <div class="card-body border border-primary">
+            <h2>Nombre et infos des flottes en cours: {{len .flottes}}</h2>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    {{range .nbPages}}
+                        <li class="page-item"><a class="page-link" href="/flottes?page={{.}}">
+                        {{.}}</a></li>
+                    {{end}}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <table class="table table-bordered table-dark">
+        <thead>
+            <tr>{{if gt (len .flottes) 0}}
+                    {{range $key, $val := index .flottes 0}}
+                        <th scope="row">{{$key}}</th>
                     {{end}}
                 {{end}}
-            </tr>                          
-        {{end}}
-</tbody>
-</table>
+            </tr>
+        </thead>
+        <tbody>
+            {{range $ind, $value := .flottes}}              
+                {{if and (lt $ind $.lElem) (gt $ind $.fElem)}}
+                <tr>
+                    {{range $key, $val := $value}}
+                        {{if eq (printf "%T" $val) "map[string]interface {}"}}		
+                                <td>{{range $keys, $vals := $val}}
+                                        {{if ne $vals 0}}
+                                            <p><u>{{$keys}}</u>: {{$vals}}</p>
+                                        {{end}}
+                                    {{end}}
+                                </td>
+                        {{else}}
+                            <td>{{.}}</td>
+                        {{end}}
+                    {{end}}
+                </tr>
+                {{end}}                      
+            {{end}}
+        </tbody>
+    </table>
 </body>
 </html>

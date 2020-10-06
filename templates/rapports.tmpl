@@ -3,45 +3,51 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link rel="stylesheet" href="/css/bootstrap-4.3.1-dist/css/bootstrap.css">
-    <!--<script src="bootstrap-4.3.1-dist\css\bootstrap.min.js"></script>-->
     <link rel="stylesheet" href="/css/style.css">
     <title>Ogame Bot</title>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <b>
-    <nav class="navbar-text">
-        <div class="p-3 mb-2 bg-secondary text-white"><b>Connection</b></div>
-        <div class="p-3 mb-2 bg-danger text-white"><b>Connection</b></div>
-    </nav>
-    <a class="navbar-brand" href="/flottes">Flottes</a>
-    <a class="navbar-brand" href="/databoard">Tableau de bord</a>
-    <a class="btn btn-danger" href="#">Quitter</a>
-    </b>
-</nav>
-<h2>Nombre et infos des rapport: {{ len .spy}}</h2>
-<table class="table table-ordered table-dark">
-    <thead>
-        <tr>
-            <th scope="row">Coordonnées</th>
-            <th scope="row">Ressources</th>
-        </tr>
-    </thead>
-    <tbody>
-        {{range .spy}}
-            {{ if . }}
+    <nav class="nav nav-pills nav-pill font-weight-bold">
+		<a class="nav-item nav-link" href="/databoard">Tableau de bord</a>
+		<a class="nav-item nav-link active" href="/rapports">Rapport</a>
+		<a class="nav-item nav-link" href="/flottes">Flottes info</a>
+	</nav>
+<div class="card ogame">
+    <div class="card-header text-center"><h4>Nombre et infos des rapport: {{ len .spy}}</h4></div>
+    <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    {{range .nbPages}}
+                        <li class="page-item {{if eq $.Page .}}active{{end}}"><a class="page-link" href="/rapports?page={{.}}">
+                        {{.}}</a></li>
+                    {{end}}
+                </ul>
+            </nav>
+    <div class="card-body">
+        <table class="table table-ordered table-dark text-center">
+        <thead>
             <tr>
-                <td>{{range $key,$val := .Coordinate }}
-                        <p>{{$key}}: {{$val}}</p>
-                    {{end}}
-                </td>
-                <td>{{range $key,$val := .Resources }}
-                        <p>{{$key}}: {{$val}}</p>
-                    {{end}}
-                </td>
+                <th scope="row">Coordonnées</th>
+                <th scope="row">Ressources</th>
             </tr>
+        </thead>
+        <tbody>
+            {{range $k,$v := .spy}}
+                {{ if and . (and (le $.fElem $k) (ge $.lElem $k))}}
+                <tr>
+                    <td>{{range $key,$val := .Coordinate }}
+                            {{$key}}: {{$val}} - 
+                        {{end}}
+                    </td>
+                    <td>{{range $key,$val := .Resources }}
+                            {{$key}}: {{$val}} -
+                        {{end}}
+                    </td>
+                </tr>
+                {{end}}
             {{end}}
-        {{end}}
-    </tbody>
+        </tbody>
+        </table>
+    </div>
+    </div>
 </body>
 </html>

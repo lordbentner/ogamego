@@ -41,6 +41,7 @@ func launch() {
 	for {
 		items.planetes = bot.GetPlanets()
 		fl, _ := bot.GetFleets()
+		stres := bot.GetResearch()
 		items.planetinfos = nil
 		i := 0
 		if len(items.planetes) > len(items.facilities) {
@@ -49,7 +50,7 @@ func launch() {
 			items.ships = make([]map[string]interface{}, len(items.planetes))
 			items.res_build = make([]map[string]interface{}, len(items.planetes))
 			items.consInBuild = make([]ogame.ID, len(items.planetes))
-			items.countInBuild = make([]int64, len(items.planetes))
+			items.countInBuild = make([]string, len(items.planetes))
 		}
 
 		if len(items.fleets) < len(fl) {
@@ -70,7 +71,8 @@ func launch() {
 			items.consInBuild[i] = plinfo.consInBuild
 			items.countInBuild[i] = plinfo.countInBuild
 			satProduction(planete.ID)
-			if i == 0 {
+			inter := stres.IntergalacticResearchNetwork
+			if i < int(inter) {
 				items.researchs = setresearch(id)
 			} else {
 				transporter(id, items.planetes[0].Coordinate)
@@ -101,6 +103,23 @@ func launch() {
 func tem(letter string) {
 	t := template.Must(template.New("letter").Parse(letter))
 	fmt.Println(t)
+}
+
+func buildPage(ctx *macaron.Context, req *http.Request, elInPage int, nbItem int) {
+	page, ok := req.URL.Query()["page"]
+	ctx.Data["fElem"] = 0
+	ctx.Data["lElem"] = elInPage
+	ctx.Data["Page"] = 1
+	if ok && len(page[0]) > 0 {
+		el, _ := strconv.Atoi(page[0])
+		ctx.Data["fElem"] = (el - 1) * elInPage
+		ctx.Data["lElem"] = el * elInPage
+		ctx.Data["Page"] = el
+	}
+	var nbPages []int
+	for i := 0; i < nbItem/elInPage+1; i++ {
+		nbPages = append(nbPages, elInPage+1)
+	}
 }
 
 func main() {
@@ -138,24 +157,43 @@ func main() {
 	m.Get("/flottes", func(ctx *macaron.Context, req *http.Request) {
 		page, ok := req.URL.Query()["page"]
 		ctx.Data["fElem"] = 0
-		ctx.Data["lElem"] = 5
+		ctx.Data["lElem"] = 4
+		ctx.Data["Page"] = 1
 		if ok && len(page[0]) > 0 {
 			el, _ := strconv.Atoi(page[0])
-			ctx.Data["fElem"] = (el - 1) * 5
-			ctx.Data["lElem"] = el * 5
+			ctx.Data["fElem"] = (el - 1) * 4
+			ctx.Data["lElem"] = el * 4
+			ctx.Data["Page"] = el
 		}
-		ctx.Data["flottes"] = items.fleets
 		var nbPages []int
-		for i := 0; i < int(math.Floor(float64(len(items.fleets)/5))); i++ {
+		for i := 0; i < len(items.fleets)/4+1; i++ {
 			nbPages = append(nbPages, i+1)
 		}
 
+		ctx.Data["flottes"] = items.fleets
 		ctx.Data["nbPages"] = nbPages
 		ctx.HTML(200, "flottes")
 	})
 
-	m.Get("/rapports", func(ctx *macaron.Context) {
+	m.Get("/rapports", func(ctx *macaron.Context, req *http.Request) {
 		ctx.Data["spy"] = RapportEspionnage
+		page, ok := req.URL.Query()["page"]
+		ctx.Data["fElem"] = 0
+		ctx.Data["lElem"] = 15
+		ctx.Data["Page"] = 1
+		if ok && len(page[0]) > 0 {
+			el, _ := strconv.Atoi(page[0])
+			ctx.Data["fElem"] = (el - 1) * 15
+			ctx.Data["lElem"] = el * 15
+			ctx.Data["Page"] = el
+		}
+
+		var nbPages []int
+		for i := 0; i < len(RapportEspionnage)/15+1; i++ {
+			nbPages = append(nbPages, i+1)
+		}
+
+		ctx.Data["nbPages"] = nbPages
 		ctx.HTML(200, "rapports")
 	})
 

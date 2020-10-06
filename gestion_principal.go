@@ -15,7 +15,7 @@ type PlaneteInfos struct {
 	res_build    map[string]interface{}
 	ships        ogame.ShipsInfos
 	consInBuild  ogame.ID
-	countInBuild int64
+	countInBuild string
 }
 
 type Login struct {
@@ -35,7 +35,7 @@ type GlobalList struct {
 	res_build          []map[string]interface{}
 	ships              []map[string]interface{}
 	consInBuild        []ogame.ID
-	countInBuild       []int64
+	countInBuild       []string
 	researchInBuild    ogame.ID
 	countResearchBuild int64
 }
@@ -123,6 +123,7 @@ func gestionrapport(id ogame.CelestialID) {
 			}
 
 			hasAttacked := gestionAttack(id, totalres, msgR.Coordinate)
+			fmt.Println("coordonnées:", msgR.Coordinate)
 			RapportEspionnage = append(RapportEspionnage, re)
 			if hasAttacked {
 				bot.DeleteMessage(er.ID)
@@ -204,13 +205,14 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 		bot.BuildBuilding(id, ogame.SpaceDockID)
 	}
 
-	consInBuild, countInBuild, resinbuild, countresbuild := bot.ConstructionsBeingBuilt(id)
+	consInBuild, ctInBld, resinbuild, countresbuild := bot.ConstructionsBeingBuilt(id)
+	time := fmt.Sprintf("%sh %smn %ss", ctInBld/3600, (ctInBld%3600)/60, ctInBld%60)
 	var planetinfo PlaneteInfos
 	planetinfo.res_build = structs.Map(res)
 	planetinfo.resources = structs.Map(resource)
 	planetinfo.facilities = structs.Map(fac)
 	planetinfo.consInBuild = consInBuild
-	planetinfo.countInBuild = countInBuild
+	planetinfo.countInBuild = time
 	items.researchInBuild = resinbuild
 	items.countResearchBuild = countresbuild
 	return planetinfo
@@ -280,4 +282,20 @@ func transporter(id ogame.CelestialID, idwhere ogame.Coordinate) {
 			ogame.Resources{Deuterium: 100000}, 0, 0)
 		fmt.Println("transport de déuterium vers:", idwhere)
 	}
+}
+
+func add(a int, b int) int {
+	return (a + b)
+}
+
+func sub(a int, b int) int {
+	return (a - b)
+}
+
+func mul(a int, b int) int {
+	return (a * b)
+}
+
+func div(a int, b int) int {
+	return (a / b)
 }

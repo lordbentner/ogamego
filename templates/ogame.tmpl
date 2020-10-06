@@ -3,96 +3,84 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link rel="stylesheet" href="/css/bootstrap-4.3.1-dist/css/bootstrap.css">
-    <!--<script src="bootstrap-4.3.1-dist\css\bootstrap.min.js"></script>-->
     <link rel="stylesheet" href="/css/style.css">
     <title>Ogame Bot</title>
 </head>
-<body class="ogame">
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <b>
-    <a class="navbar-brand" href="#">Start</a>
-    <a class="navbar-brand" href="#">Stop</a>
-    <a class="navbar-brand" href="#">Refresh</a>
-    <nav class="navbar-text">
-            <div class="p-3 mb-2 bg-secondary text-white"><b>Connection</b></div>
-    </nav>
-    <nav class="navbar-text">
-            <div class="p-3 mb-2 bg-secondary text-white"><b>Lancement</b></div>
-    </nav>
-    <a class="navbar-brand" href="/rapports">Rapport</a>
-    <a class="navbar-brand" href="/flottes">Flottes info</a>
-    <a class="btn btn-danger" href="#">Quitter</a>
-    </b>
-</nav>
-<h4>niveau des recherches</h4>
-<div class="card">
-	<table class="table table-ordered table-dark">
-		<thead>
-			<tr>
-				{{range $k, $v := .researchs }}
-						<th scope="col">{{$k}}</th>
-				{{end}}
-			</tr>
-		</thead>
-		<tbody>
-			<tr>{{range $k, $v := .researchs }}
-						<td scope="col">{{$v}}</td>
-				{{end}}
-			</tr>
-			<tr><td><h5>Recherche en cours</h5> </td><td><b>{{.resInBuild}}:</b> {{.countResInBuild}} sec</td> </tr>
-		</tbody>
-	</table>
-<div class="card">
-	<table class="table table-ordered table-dark">
-		<thead>				
-		</thead>
-		<tbody>
-			<tr><th scope="row"><h4>Planète</h4></th>
-				{{ range .planetes }}
-					<td><b>{{.Name}}</b><p>{{.Coordinate}}</p></td>					
-				{{end}}
-			</tr>
-			<tr><th scope="row"><h4>Ressources</h4></th>
-				{{range .resources}}
-					<td>{{range $key, $val := .}}
+<body>
+	<nav class="nav nav-pills nav-pill font-weight-bold">
+		<a class="nav-item nav-link active" href="/databoard">Tableau de bord</a>
+		<a class="nav-item nav-link" href="/rapports">Rapport</a>
+		<a class="nav-item nav-link" href="/flottes">Flottes info</a>
+	</nav>
+<div class="card border border-primary d-flex justify-content-center">
+	<div class="card-title text-center"><h4>niveau des recherches</h4></div>
+	<div class="card-body ogame">
+		<table class="table table-ordered table-info text-center">
+			<thead>
+				<tr>
+					{{range $k, $v := .researchs }}
+							<th scope="col">{{$k}}</th>
+					{{end}}
+				</tr>
+			</thead>
+			<tbody>
+				<tr>{{range $k, $v := .researchs }}
+							<td scope="col">{{$v}}</td>
+					{{end}}
+				</tr>
+				<tr><td><h5>Recherche en cours</h5> </td><td><b>{{.resInBuild}}:</b> {{.countResInBuild}} sec</td> </tr>
+			</tbody>
+		</table>
+		<div class="card-header text-center"><h4>Tableau général</h4></div>
+		<table class="table table-ordered table-dark">
+			<thead>				
+			</thead>
+			<tbody>
+				<tr><th scope="row"><h4>Planète</h4></th>
+					{{ range .planetes }}
+						<td><b>{{.Name}}</b><p>{{.Coordinate}}</p></td>					
+					{{end}}
+				</tr>
+				<tr><th scope="row"><h4>Ressources</h4></th>
+					{{range .resources}}
+						<td>{{range $key, $val := .}}
+								<p>{{$key}}: {{$val}}</p>
+							{{end}}
+						</td>
+					{{end}}
+				<tr><th scope="row"><h4>niveaux des <br />installations</h4></th>
+					{{range $k, $v := .facilities }}				
+					<td>{{range $key , $val := $v}}
+						{{if ne $val 0}}
 							<p>{{$key}}: {{$val}}</p>
 						{{end}}
-					</td>
+					{{end}}</td>
 				{{end}}
-			<tr><th scope="row"><h4>niveaux des <br />installations</h4></th>
-				{{range $k, $v := .facilities }}				
-				<td>{{range $key , $val := $v}}
-					{{if ne $val 0}}
-						<p>{{$key}}: {{$val}}</p>
-					{{end}}
-				{{end}}</td>
-			{{end}}
-			</tr>
-			<tr><th scope="row"><h4>niveau des<br /> ressources</h4></th>
-				{{range $k,$v := .res_build}}
-				<td>{{range $key , $val := $v}}
-					{{if ne $val 0}}
-						<p>{{$key}}: {{$val}}</p>
-					{{end}}
-				{{end}}</td>
-			{{end}}
-			</tr> 
-			<tr><th scope="row"><h4>Vaisseaux</h4></th>
-				{{range $k ,$v := .ships}}
+				</tr>
+				<tr><th scope="row"><h4>niveau des<br /> ressources</h4></th>
+					{{range $k,$v := .res_build}}
 					<td>{{range $key , $val := $v}}
-					{{if ne $val 0}}
-						<p>{{$key}}: {{$val}}</p>
-					{{end}}
-				{{end}}</td>
-			{{end}}
-			</tr>
-			<tr><th scope="row"><h4>Temps de <br />constructions<br />/recherches</h4></th>
-				{{range $key, $val := .countInBuild}}						
-					<td>{{index $.consInBuild $key}}: {{$val}} sec</td>
+						{{if ne $val 0}}
+							<p>{{$key}}: {{$val}}</p>
+						{{end}}
+					{{end}}</td>
 				{{end}}
-			</tr>
-							
-	</table>
-</div>
+				</tr> 
+				<tr><th scope="row"><h4>Vaisseaux</h4></th>
+					{{range $k ,$v := .ships}}
+						<td>{{range $key , $val := $v}}
+						{{if ne $val 0}}
+							<p>{{$key}}: {{$val}}</p>
+						{{end}}
+					{{end}}</td>
+				{{end}}
+				</tr>
+				<tr><th scope="row"><h4>Temps de <br />constructions<br />/recherches</h4></th>
+					{{range $key, $val := .countInBuild}}						
+						<td>{{index $.consInBuild $key}}: {{$val}} sec</td>
+					{{end}}
+				</tr>								
+		</table>
+	</div>
 </body>
 </html>

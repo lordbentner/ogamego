@@ -7,24 +7,18 @@
     <title>Ogame Bot</title>
 </head>
 <body class="flottes">
-    <nav>
-        <b>
-            <nav class="navbar-text">
-                <div class="p-3 mb-2 bg-secondary text-white"><b>Connection</b></div>
-                <div class="p-3 mb-2 bg-danger text-white"><b>Connection</b></div>
-            </nav>
-            <a class="navbar-brand" href="/rapports">Rapports</a>
-            <a class="navbar-brand" href="/databoard">Tableau de bord</a>
-            <a class="btn btn-danger" href="#">Quitter</a>
-        </b>
-    </nav>
+   <nav class="nav nav-pills nav-pill ogame font-weight-bold">
+		<a class="nav-item nav-link" href="/databoard">Tableau de bord</a>
+		<a class="nav-item nav-link" href="/rapports">Rapport</a>
+		<a class="nav-item nav-link active" href="/flottes">Flottes info</a>
+	</nav>
     <div class="card text-center border border-primary">
-        <div class="card-body border border-primary">
+        <div class="card-body">
             <h2>Nombre et infos des flottes en cours: {{len .flottes}}</h2>
             <nav aria-label="Page navigation example">
                 <ul class="pagination">
                     {{range .nbPages}}
-                        <li class="page-item"><a class="page-link" href="/flottes?page={{.}}">
+                        <li class="page-item {{if eq $.Page .}}active{{end}}"><a class="page-link" href="/flottes?page={{.}}">
                         {{.}}</a></li>
                     {{end}}
                 </ul>
@@ -42,7 +36,7 @@
         </thead>
         <tbody>
             {{range $ind, $value := .flottes}}              
-                {{if and (lt $ind $.lElem) (gt $ind $.fElem)}}
+                {{if and (le $ind $.lElem) (ge $ind $.fElem)}}
                 <tr>
                     {{range $key, $val := $value}}
                         {{if eq (printf "%T" $val) "map[string]interface {}"}}		

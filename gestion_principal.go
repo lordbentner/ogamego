@@ -37,7 +37,7 @@ type GlobalList struct {
 	consInBuild        []ogame.ID
 	countInBuild       []string
 	researchInBuild    ogame.ID
-	countResearchBuild int64
+	countResearchBuild string
 }
 
 func gestionUnderAttack(id ogame.CelestialID) {
@@ -111,7 +111,6 @@ func gestionrapport(id ogame.CelestialID) {
 						break
 					}
 					coord[i] = dest.(int64)
-					i++
 				}
 
 				fmt.Println("cord de:", coord, "  msgR.Coordinate:", msgR.Coordinate)
@@ -205,8 +204,8 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 		bot.BuildBuilding(id, ogame.SpaceDockID)
 	}
 
-	consInBuild, ctInBld, resinbuild, countresbuild := bot.ConstructionsBeingBuilt(id)
-	time := fmt.Sprintf("%sh %smn %ss", ctInBld/3600, (ctInBld%3600)/60, ctInBld%60)
+	consInBuild, ctInBld, resinbuild, countres := bot.ConstructionsBeingBuilt(id)
+	time := fmt.Sprintf("%dh %dmn %ds", ctInBld/3600, (ctInBld%3600)/60, ctInBld%60)
 	var planetinfo PlaneteInfos
 	planetinfo.res_build = structs.Map(res)
 	planetinfo.resources = structs.Map(resource)
@@ -214,7 +213,7 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 	planetinfo.consInBuild = consInBuild
 	planetinfo.countInBuild = time
 	items.researchInBuild = resinbuild
-	items.countResearchBuild = countresbuild
+	items.countResearchBuild = fmt.Sprintf("%dh %dmn %ds", countres/3600, (countres%3600)/60, countres%60)
 	return planetinfo
 }
 

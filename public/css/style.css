@@ -11,15 +11,38 @@
 }
 
 .ogame {
-    background-image: url("/images/imagescroiseur.jpg");
+    background-image: url("/images/ogame-logo.jpg");
     background-repeat: no-repeat;
-    background-size: 100%;
-    height: 100%;
+    background-size: cover;
+}
+
+.databoard {
+    background-image: url("/images/imagescroiseur.jpg");  
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 .flottes {
     background-image: url("/images/ogame-test.png");
     background-repeat: no-repeat;
-    width: 100%;
-    height: 100%;
+    background-size: cover;
 }
+
+.rapport {
+    background-image: url("/images/imagesedlm.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.index {
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bodyrapport {
+    background-size: cover;
+}
+
+html { height: 100%;}

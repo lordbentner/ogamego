@@ -87,13 +87,14 @@ func launch() {
 				gal = 1
 			}
 
-			setExpedition(id, planete.Coordinate)
 			comput := items.researchs["Computer"].(int64)
 			if len(fl) < int(comput) {
 				gestionEspionnage(id, gal, sys)
 				gestionrapport(id)
 				sys++
 			}
+
+			setExpedition(id, planete.Coordinate)
 
 			i++
 		}
@@ -118,8 +119,10 @@ func buildPage(ctx *macaron.Context, req *http.Request, elInPage int, nbItem int
 	}
 	var nbPages []int
 	for i := 0; i < nbItem/elInPage+1; i++ {
-		nbPages = append(nbPages, elInPage+1)
+		nbPages = append(nbPages, i+1)
 	}
+
+	ctx.Data["nbPages"] = nbPages
 }
 
 func main() {
@@ -155,45 +158,14 @@ func main() {
 	})
 
 	m.Get("/flottes", func(ctx *macaron.Context, req *http.Request) {
-		page, ok := req.URL.Query()["page"]
-		ctx.Data["fElem"] = 0
-		ctx.Data["lElem"] = 4
-		ctx.Data["Page"] = 1
-		if ok && len(page[0]) > 0 {
-			el, _ := strconv.Atoi(page[0])
-			ctx.Data["fElem"] = (el - 1) * 4
-			ctx.Data["lElem"] = el * 4
-			ctx.Data["Page"] = el
-		}
-		var nbPages []int
-		for i := 0; i < len(items.fleets)/4+1; i++ {
-			nbPages = append(nbPages, i+1)
-		}
-
+		buildPage(ctx, req, 4, len(items.fleets))
 		ctx.Data["flottes"] = items.fleets
-		ctx.Data["nbPages"] = nbPages
 		ctx.HTML(200, "flottes")
 	})
 
 	m.Get("/rapports", func(ctx *macaron.Context, req *http.Request) {
+		buildPage(ctx, req, 15, len(RapportEspionnage))
 		ctx.Data["spy"] = RapportEspionnage
-		page, ok := req.URL.Query()["page"]
-		ctx.Data["fElem"] = 0
-		ctx.Data["lElem"] = 15
-		ctx.Data["Page"] = 1
-		if ok && len(page[0]) > 0 {
-			el, _ := strconv.Atoi(page[0])
-			ctx.Data["fElem"] = (el - 1) * 15
-			ctx.Data["lElem"] = el * 15
-			ctx.Data["Page"] = el
-		}
-
-		var nbPages []int
-		for i := 0; i < len(RapportEspionnage)/15+1; i++ {
-			nbPages = append(nbPages, i+1)
-		}
-
-		ctx.Data["nbPages"] = nbPages
 		ctx.HTML(200, "rapports")
 	})
 

@@ -6,22 +6,22 @@
     <link rel="stylesheet" href="/css/style.css">
     <title>Ogame Bot</title>
 </head>
-<body>
-    <nav class="nav nav-pills nav-pill font-weight-bold">
-		<a class="nav-item nav-link" href="/databoard">Tableau de bord</a>
-		<a class="nav-item nav-link active" href="/rapports">Rapport</a>
-		<a class="nav-item nav-link" href="/flottes">Flottes info</a>
-	</nav>
-<div class="card ogame">
-    <div class="card-header text-center"><h4>Nombre et infos des rapport: {{ len .spy}}</h4></div>
+<body class="h-100">
+<nav class="nav nav-pills nav-pill font-weight-bold">
+    <a class="nav-item nav-link" href="/databoard">Tableau de bord</a>
+    <a class="nav-item nav-link active" href="/rapports">Rapport</a>
+    <a class="nav-item nav-link" href="/flottes">Flottes info</a>
+</nav>
+<div class="card h-100 d-flex flex-column align-items-center rapport">
+    <div class="card-header text-center text-white"><h4>Nombre et infos des rapport: {{ len .spy}}</h4></div>
     <nav aria-label="Page navigation example">
-                <ul class="pagination">
-                    {{range .nbPages}}
-                        <li class="page-item {{if eq $.Page .}}active{{end}}"><a class="page-link" href="/rapports?page={{.}}">
-                        {{.}}</a></li>
-                    {{end}}
-                </ul>
-            </nav>
+        <ul class="pagination">
+            {{range .nbPages}}
+                <li class="page-item {{if eq $.Page .}}active{{end}}"><a class="page-link" href="/rapports?page={{.}}">
+                {{.}}</a></li>
+            {{end}}
+        </ul>
+    </nav>
     <div class="card-body">
         <table class="table table-ordered table-dark text-center">
         <thead>
@@ -48,6 +48,6 @@
         </tbody>
         </table>
     </div>
-    </div>
+</div>
 </body>
 </html>

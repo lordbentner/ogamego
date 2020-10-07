@@ -6,13 +6,13 @@
     <link rel="stylesheet" href="/css/style.css">
     <title>Ogame Bot</title>
 </head>
-<body class="flottes">
-   <nav class="nav nav-pills nav-pill ogame font-weight-bold">
+<body>
+   <nav class="nav nav-pills nav-pill font-weight-bold">
 		<a class="nav-item nav-link" href="/databoard">Tableau de bord</a>
 		<a class="nav-item nav-link" href="/rapports">Rapport</a>
 		<a class="nav-item nav-link active" href="/flottes">Flottes info</a>
 	</nav>
-    <div class="card text-center border border-primary">
+    <div class="card text-center border border-primary flottes">
         <div class="card-body">
             <h2>Nombre et infos des flottes en cours: {{len .flottes}}</h2>
             <nav aria-label="Page navigation example">
@@ -24,7 +24,6 @@
                 </ul>
             </nav>
         </div>
-    </div>
     <table class="table table-bordered table-dark">
         <thead>
             <tr>{{if gt (len .flottes) 0}}
@@ -36,7 +35,7 @@
         </thead>
         <tbody>
             {{range $ind, $value := .flottes}}              
-                {{if and (le $ind $.lElem) (ge $ind $.fElem)}}
+                {{if and (le $ind $.lElem) (gt $ind $.fElem)}}
                 <tr>
                     {{range $key, $val := $value}}
                         {{if eq (printf "%T" $val) "map[string]interface {}"}}		
@@ -55,5 +54,6 @@
             {{end}}
         </tbody>
     </table>
+    </div>
 </body>
 </html>

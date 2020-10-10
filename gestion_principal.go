@@ -71,11 +71,17 @@ func attackSpy(id ogame.CelestialID, coord ogame.Coordinate) {
 
 func gestionrapport(id ogame.CelestialID) {
 	erm, _ := bot.GetEspionageReportMessages()
+
 	if len(RapportEspionnage) > len(erm) {
 		RapportEspionnage = make([]map[string]interface{}, len(erm))
 	}
 
 	for _, er := range erm {
+
+		if er.Type == ogame.Action {
+			fmt.Println(bot.GetEspionageReport(er.ID))
+		}
+
 		if er.Type == ogame.Report {
 			msgR, _ := bot.GetEspionageReport(er.ID)
 			re := structs.Map(msgR)
@@ -98,24 +104,6 @@ func gestionrapport(id ogame.CelestialID) {
 			for k, nbdef := range df {
 				if nbdef.(int64) > 0 && !strings.Contains(k, "Missiles") {
 					fmt.Println("defense detectes!!")
-					bot.DeleteMessage(er.ID)
-					return
-				}
-			}
-
-			for _, fleet := range items.fleets {
-				var coord [3]int64
-				flee, _ := fleet["destination"].([]interface{})
-				for i, dest := range flee {
-					if i == 3 {
-						break
-					}
-					coord[i] = dest.(int64)
-				}
-
-				fmt.Println("cord de:", coord, "  msgR.Coordinate:", msgR.Coordinate)
-				if coord[0] == msgR.Coordinate.Galaxy && coord[2] == msgR.Coordinate.System &&
-					coord[1] == msgR.Coordinate.Position {
 					bot.DeleteMessage(er.ID)
 					return
 				}
@@ -149,6 +137,14 @@ func gestionEspionnage(id ogame.CelestialID, gal int64, sys int64) {
 
 func setShips(id ogame.CelestialID) map[string]interface{} {
 	ships, _ := bot.GetShips(id)
+	if ships.EspionageProbe < 30 {
+		bot.BuildShips(id, ogame.EspionageProbeID, 1)
+	}
+
+	if ships.EspionageProbe < 100 {
+		bot.BuildShips(id, ogame.LargeCargoID, 1)
+	}
+
 	sh := structs.Map(ships)
 	return sh
 }

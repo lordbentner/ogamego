@@ -80,7 +80,7 @@ func gestionrapport(id ogame.CelestialID) {
 			msgR, _ := bot.GetEspionageReport(er.ID)
 			re := structs.Map(msgR)
 			totalres := msgR.Resources.Deuterium + msgR.Resources.Metal + msgR.Resources.Crystal
-			if msgR.HasDefensesInformation == false || msgR.HasFleetInformation == false || totalres < 150000 {
+			if msgR.HasDefensesInformation == false || msgR.HasFleetInformation == false || totalres < 1000000 {
 				bot.DeleteMessage(er.ID)
 				return
 			}

@@ -7,10 +7,11 @@
     <title>Ogame Bot</title>
 </head>
 <body>
-	<nav class="nav nav-pills nav-pill font-weight-bold">
-		<a class="nav-item nav-link active" href="/databoard">Tableau de bord</a>
-		<a class="nav-item nav-link" href="/rapports">Rapport</a>
-		<a class="nav-item nav-link" href="/flottes">Flottes info</a>
+	<nav class="nav nav-pills nav-pill font-weight-bold bg-info navbar-expand-lg">
+		<a class="navbar-brand nav-link active" href="/databoard">Tableau de bord</a>
+		<a class="navbar-brand nav-link" href="/rapports">Rapport</a>
+		<a class="navbar-brand nav-link" href="/flottes">Flottes info</a>
+		<span class="navbar-text">Temps de reconnection: {{.time_con}}</span>
 	</nav>
 	<div class="card border border-primary d-flex justify-content-center databoard">
 	<div class="card-title text-center"><h4>niveau des recherches</h4></div>

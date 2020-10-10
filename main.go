@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"text/template"
+	"time"
 
 	"github.com/alaingilbert/ogame"
 	"github.com/fatih/structs"
@@ -20,8 +21,20 @@ var (
 var (
 	err error
 )
+var (
+	startLog time.Time
+)
 var items GlobalList
 var RapportEspionnage []map[string]interface{}
+
+func getTimeInGame() string {
+	if !bot.IsConnected() || !bot.IsLoggedIn() {
+		return "Non Connecté!"
+	}
+
+	currentTime := time.Now()
+	return currentTime.Sub(startLog).String()
+}
 
 func satProduction(id ogame.PlanetID) {
 	pl, _ := bot.GetPlanet(id)
@@ -72,7 +85,7 @@ func launch() {
 			items.countInBuild[i] = plinfo.countInBuild
 			satProduction(planete.ID)
 			inter := stres.IntergalacticResearchNetwork
-			if i < int(inter) {
+			if i <= int(inter) {
 				items.researchs = setresearch(id)
 			} else {
 				transporter(id, items.planetes[0].Coordinate)
@@ -122,6 +135,7 @@ func buildPage(ctx *macaron.Context, req *http.Request, elInPage int, nbItem int
 		nbPages = append(nbPages, i+1)
 	}
 
+	ctx.Data["time_con"] = getTimeInGame()
 	ctx.Data["nbPages"] = nbPages
 }
 
@@ -137,8 +151,13 @@ func main() {
 			ctx.Redirect("/")
 		} else {
 			bot, err = ogame.New(login.Universe, login.User, login.Password, "fr")
-			go launch()
-			ctx.Redirect("/databoard")
+			if err != nil {
+				panic(err)
+			} else {
+				startLog = time.Now()
+				go launch()
+				ctx.Redirect("/databoard")
+			}
 		}
 	})
 	m.Get("/databoard", func(ctx *macaron.Context) {
@@ -154,6 +173,7 @@ func main() {
 		ctx.Data["countInBuild"] = items.countInBuild
 		ctx.Data["resInBuild"] = items.researchInBuild
 		ctx.Data["countResInBuild"] = items.countResearchBuild
+		ctx.Data["time_con"] = getTimeInGame()
 		ctx.HTML(200, "ogame")
 	})
 
@@ -176,6 +196,7 @@ func main() {
 		host = "127.0.0.1"
 		port = 8000
 	}
+
 	m.Run(host, port)
 	// })
 }

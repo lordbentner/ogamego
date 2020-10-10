@@ -7,10 +7,11 @@
     <title>Ogame Bot</title>
 </head>
 <body class="h-100">
-<nav class="nav nav-pills nav-pill font-weight-bold">
+<nav class="nav nav-pills nav-pill font-weight-bold bg-info">
     <a class="nav-item nav-link" href="/databoard">Tableau de bord</a>
     <a class="nav-item nav-link active" href="/rapports">Rapport</a>
     <a class="nav-item nav-link" href="/flottes">Flottes info</a>
+    <span class="navbar-text">Temps de reconnection: {{.time_con}}</span>
 </nav>
 <div class="card h-100 d-flex flex-column align-items-center rapport">
     <div class="card-header text-center text-white"><h4>Nombre et infos des rapport: {{ len .spy}}</h4></div>

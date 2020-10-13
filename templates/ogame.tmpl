@@ -4,9 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link rel="stylesheet" href="/css/bootstrap-4.3.1-dist/css/bootstrap.css">
     <link rel="stylesheet" href="/css/style.css">
-	<link rel = "icon" href =  
-"https://media.geeksforgeeks.org/wp-content/cdn-uploads/gfg_200X200.png" 
-        type = "image/x-icon"> 
+	<link rel = "icon" href = "/images/icon.jpg" type = "image/x-icon"> 
     <title>Ogame Bot</title>
 </head>
 <body>
@@ -14,7 +12,7 @@
 		<a class="navbar-brand nav-link active" href="/databoard">Tableau de bord</a>
 		<a class="navbar-brand nav-link" href="/rapports">Rapport</a>
 		<a class="navbar-brand nav-link" href="/flottes">Flottes info</a>
-		<span class="navbar-text">Temps de reconnection: {{.time_con}}</span>
+		<span class="navbar-text text-lg-right">Temps de connexion: {{.time_con}}</span>
 	</nav>
 	<div class="card border border-primary d-flex justify-content-center databoard">
 	<div class="card-title text-center"><h4>niveau des recherches</h4></div>
@@ -45,11 +43,13 @@
 						<td><b>{{.Name}}</b><p>{{.Coordinate}}</p></td>					
 					{{end}}
 				</tr>
-				<tr><th scope="row"><h4>Ressources</h4></th>
-					{{range .resources}}
+				<tr><th scope="row"><h4>Ressources</h4><p>Dispo - prod - <br />Capacité de stockage</p></th>
+					{{range .resdetails}}
 						<td>{{range $key, $val := .}}
-								<p>{{$key}}: {{$val}}</p>
-							{{end}}
+								<p>{{$key}}:{{range $res, $v := $val}} - {{$v}}
+								{{end}}
+								</p>
+							{{end}}							
 						</td>
 					{{end}}
 				<tr><th scope="row"><h4>niveaux des <br />installations</h4></th>

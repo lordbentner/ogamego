@@ -10,12 +10,13 @@ import (
 )
 
 type PlaneteInfos struct {
-	facilities   map[string]interface{}
-	resources    map[string]interface{}
-	res_build    map[string]interface{}
-	ships        ogame.ShipsInfos
-	consInBuild  ogame.ID
-	countInBuild string
+	facilities        map[string]interface{}
+	resources         map[string]interface{}
+	res_build         map[string]interface{}
+	detailsRessources map[string]interface{}
+	ships             ogame.ShipsInfos
+	consInBuild       ogame.ID
+	countInBuild      string
 }
 
 type Login struct {
@@ -34,6 +35,7 @@ type GlobalList struct {
 	resources          []map[string]interface{}
 	res_build          []map[string]interface{}
 	ships              []map[string]interface{}
+	detailsRessources  []map[string]interface{}
 	consInBuild        []ogame.ID
 	countInBuild       []string
 	researchInBuild    ogame.ID
@@ -77,11 +79,6 @@ func gestionrapport(id ogame.CelestialID) {
 	}
 
 	for _, er := range erm {
-
-		if er.Type == ogame.Action {
-			fmt.Println(bot.GetEspionageReport(er.ID))
-		}
-
 		if er.Type == ogame.Report {
 			msgR, _ := bot.GetEspionageReport(er.ID)
 			re := structs.Map(msgR)
@@ -167,6 +164,7 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 	res, _ := bot.GetResourcesBuildings(id)
 	resource, _ := bot.GetResources(id)
 	fac, _ := bot.GetFacilities(id)
+	detres, _ := bot.GetResourcesDetails(id)
 	if fac.RoboticsFactory < 10 {
 		bot.BuildBuilding(id, ogame.RoboticsFactoryID)
 	}
@@ -200,12 +198,18 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 		bot.BuildBuilding(id, ogame.SpaceDockID)
 	}
 
+	if detres.Metal.Available > detres.Metal.StorageCapacity {
+		nb := (detres.Metal.Available - detres.Metal.StorageCapacity) / 2000
+		bot.BuildDefense(id, ogame.RocketLauncherID, nb)
+	}
+
 	consInBuild, ctInBld, resinbuild, countres := bot.ConstructionsBeingBuilt(id)
 	time := fmt.Sprintf("%dh %dmn %ds", ctInBld/3600, (ctInBld%3600)/60, ctInBld%60)
 	var planetinfo PlaneteInfos
 	planetinfo.res_build = structs.Map(res)
 	planetinfo.resources = structs.Map(resource)
 	planetinfo.facilities = structs.Map(fac)
+	planetinfo.detailsRessources = structs.Map(detres)
 	planetinfo.consInBuild = consInBuild
 	planetinfo.countInBuild = time
 	items.researchInBuild = resinbuild
@@ -218,6 +222,9 @@ func setresearch(id ogame.CelestialID) map[string]interface{} {
 	bot.BuildTechnology(id, ogame.IntergalacticResearchNetworkID)
 	res := bot.GetResearch()
 	fac, _ := bot.GetFacilities(id)
+	if fac.ResearchLab < 12 {
+		bot.BuildBuilding(id, ogame.ResearchLabID)
+	}
 	if res.EnergyTechnology < 8 {
 		bot.BuildTechnology(id, ogame.EnergyTechnologyID)
 	}
@@ -228,10 +235,6 @@ func setresearch(id ogame.CelestialID) map[string]interface{} {
 
 	if res.LaserTechnology < 10 {
 		bot.BuildTechnology(id, ogame.LaserTechnologyID)
-	}
-
-	if fac.ResearchLab < 12 {
-		bot.BuildBuilding(id, ogame.ResearchLabID)
 	}
 
 	if res.IonTechnology < 5 {

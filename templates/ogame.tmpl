@@ -8,11 +8,13 @@
     <title>Ogame Bot</title>
 </head>
 <body>
-	<nav class="nav nav-pills nav-pill font-weight-bold bg-info navbar-expand-lg">
+	<nav class="nav nav-pills nav-pill justify-content-between font-weight-bold bg-info navbar-expand-lg">
 		<a class="navbar-brand nav-link active" href="/databoard">Tableau de bord</a>
 		<a class="navbar-brand nav-link" href="/rapports">Rapport</a>
-		<a class="navbar-brand nav-link" href="/flottes">Flottes info</a>
+		<a class="navbar-brand nav-link" href="/flottes">Flottes info</a>	
 		<span class="navbar-text text-lg-right">Temps de connexion: {{.time_con}}</span>
+		<span class="navbar-text text-lg-right"> {{.point}} points</span>
+		<a class="navbar-brand nav-link bg-danger" href="/quit">Quitter</a>
 	</nav>
 	<div class="card border border-primary d-flex justify-content-center databoard">
 	<div class="card-title text-center"><h4>niveau des recherches</h4></div>
@@ -40,7 +42,21 @@
 			<tbody>
 				<tr><th scope="row"><h4>Planète</h4></th>
 					{{ range .planetes }}
-						<td><b>{{.Name}}</b><p>{{.Coordinate}}</p></td>					
+						<td><b>{{.Name}}</b><p>{{.Coordinate}}</p>
+						{{$Co := .Coordinate}}
+							{{ range $.lunes}}
+								{{if and (eq .Coordinate.System $Co.System) (eq .Coordinate.Galaxy $Co.Galaxy) }}
+									<p>Lune: {{.Coordinate}}</p>
+									{{range $.BuildLune}}
+										{{range $key , $val := .}}
+											{{if ne $val 0}}
+												<p>{{$key}}: {{$val}}<p>
+											{{end}}
+										{{end}}
+									{{end}}
+								{{end}}	
+							{{end}}	
+						</td>								
 					{{end}}
 				</tr>
 				<tr><th scope="row"><h4>Ressources</h4><p>Dispo - prod - <br />Capacité de stockage</p></th>

@@ -1,10 +1,13 @@
 package main
 
+//https://ogamebot.uc.r.appspot.com
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/alaingilbert/ogame"
@@ -13,8 +16,16 @@ import (
 	"gopkg.in/macaron.v1"
 )
 
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+
+	fmt.Fprint(w, "Hello, World!")
+}
+
 func main() {
-	// app.Main(func(a app.App) {
 	m := macaron.Classic()
 	m.Use(macaron.Renderer())
 	m.Get("/", func(ctx *macaron.Context) {
@@ -25,10 +36,13 @@ func main() {
 			ctx.Redirect("/")
 		} else {
 			bot, err = ogame.New(login.Universe, login.User, login.Password, "fr")
+			file, _ := json.MarshalIndent(login, "", "login")
+			_ = ioutil.WriteFile("data.json", file, 0644)
 			if err != nil {
 				panic(err)
 			} else {
 				startLog = time.Now()
+				Logout = false
 				go launch()
 				ctx.Redirect("/databoard")
 			}
@@ -37,6 +51,7 @@ func main() {
 	m.Get("/databoard", func(ctx *macaron.Context) {
 		MapItems := structs.Map(items)
 		ctx.Data["items"] = MapItems
+		ctx.Data["lunes"] = items.lunes
 		ctx.Data["planetes"] = items.planetes
 		ctx.Data["researchs"] = items.researchs
 		ctx.Data["facilities"] = items.facilities
@@ -48,30 +63,43 @@ func main() {
 		ctx.Data["countInBuild"] = items.countInBuild
 		ctx.Data["resInBuild"] = items.researchInBuild
 		ctx.Data["countResInBuild"] = items.countResearchBuild
-		ctx.Data["time_con"] = getTimeInGame()
+		time, user := getTimeInGame()
+		ctx.Data["time_con"] = time
+		ctx.Data["user"] = user
+		ctx.Data["point"] = items.points
+		ctx.Data["BuildLune"] = BuildLune
 		ctx.HTML(200, "ogame")
 	})
 
 	m.Get("/flottes", func(ctx *macaron.Context, req *http.Request) {
 		buildPage(ctx, req, 4, len(items.fleets))
 		ctx.Data["flottes"] = items.fleets
+		ctx.Data["point"] = items.points
 		ctx.HTML(200, "flottes")
 	})
 
 	m.Get("/rapports", func(ctx *macaron.Context, req *http.Request) {
 		buildPage(ctx, req, 15, len(RapportEspionnage))
 		ctx.Data["spy"] = RapportEspionnage
+		ctx.Data["point"] = items.points
 		ctx.HTML(200, "rapports")
 	})
 
-	host := os.Getenv("IP")
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	fmt.Println("host:", host, "PORT:", port)
-	if len(host) < 1 {
-		host = "127.0.0.1"
-		port = 8000
+	m.Get("/quit", func(ctx *macaron.Context) {
+		bot.Logout()
+		Logout = true
+		ctx.Redirect("/")
+	})
+
+	http.Handle("/", m)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("Defaulting to port %s", port)
 	}
 
-	m.Run(host, port)
-	// })
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }

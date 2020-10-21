@@ -13,6 +13,8 @@
     <a class="nav-item nav-link active" href="/rapports">Rapport</a>
     <a class="nav-item nav-link" href="/flottes">Flottes info</a>
     <span class="navbar-text">Temps de reconnection: {{.time_con}}</span>
+    <span class="navbar-text"> {{.point}} points</span>
+    <a class="navbar-brand nav-link bg-danger" href="/quit">Quitter</a>
 </nav>
 <div class="card h-100 d-flex flex-column align-items-center rapport">
     <div class="card-header text-center text-white"><h4>Nombre et infos des rapport: {{ len .spy}}</h4></div>

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"strings"
 
 	"github.com/alaingilbert/ogame"
@@ -28,6 +27,7 @@ type Login struct {
 //global informations of all in struct list
 type GlobalList struct {
 	planetes           []ogame.Planet
+	lunes              []ogame.Moon
 	researchs          map[string]interface{}
 	fleets             []map[string]interface{}
 	planetinfos        map[string]PlaneteInfos
@@ -40,6 +40,7 @@ type GlobalList struct {
 	countInBuild       []string
 	researchInBuild    ogame.ID
 	countResearchBuild string
+	points             int64
 }
 
 func gestionUnderAttack(id ogame.CelestialID) {
@@ -73,15 +74,25 @@ func attackSpy(id ogame.CelestialID, coord ogame.Coordinate) {
 
 func gestionrapport(id ogame.CelestialID) {
 	erm, _ := bot.GetEspionageReportMessages()
-
-	if len(RapportEspionnage) > len(erm) {
+	/*if len(RapportEspionnage) > len(erm) {
 		RapportEspionnage = make([]map[string]interface{}, len(erm))
-	}
+	}*/
 
+	var Rapport []map[string]interface{}
 	for _, er := range erm {
 		if er.Type == ogame.Report {
+			for _, coord := range items.planetes {
+				if coord.Coordinate.Galaxy == er.Target.Galaxy &&
+					coord.Coordinate.System == er.Target.System &&
+					coord.Coordinate.Position == er.Target.Position {
+					msg, _ := bot.GetEspionageReport(er.ID)
+					re := structs.Map(msg)
+					Rapport = append(Rapport, re)
+					fmt.Println("attaque detectés!!:", Rapport)
+				}
+			}
+
 			msgR, _ := bot.GetEspionageReport(er.ID)
-			re := structs.Map(msgR)
 			totalres := msgR.Resources.Deuterium + msgR.Resources.Metal + msgR.Resources.Crystal
 			if msgR.HasDefensesInformation == false || msgR.HasFleetInformation == false || totalres < 1000000 {
 				bot.DeleteMessage(er.ID)
@@ -108,12 +119,14 @@ func gestionrapport(id ogame.CelestialID) {
 
 			hasAttacked := gestionAttack(id, totalres, msgR.Coordinate)
 			fmt.Println("coordonnées:", msgR.Coordinate)
-			RapportEspionnage = append(RapportEspionnage, re)
+			//RapportEspionnage = append(RapportEspionnage, re)
 			if hasAttacked {
 				bot.DeleteMessage(er.ID)
 			}
 		}
 	}
+
+	RapportEspionnage = Rapport
 }
 
 func gestionEspionnage(id ogame.CelestialID, gal int64, sys int64) {
@@ -138,7 +151,7 @@ func setShips(id ogame.CelestialID) map[string]interface{} {
 		bot.BuildShips(id, ogame.EspionageProbeID, 1)
 	}
 
-	if ships.EspionageProbe < 100 {
+	if ships.LargeCargo < 100 {
 		bot.BuildShips(id, ogame.LargeCargoID, 1)
 	}
 
@@ -154,7 +167,11 @@ func gestionAttack(id ogame.CelestialID, resource int64, where ogame.Coordinate)
 
 	fmt.Println("Lancement d'attaque sur ", where)
 	var quantList []ogame.Quantifiable
-	q := ogame.Quantifiable{ID: ogame.LargeCargoID, Nbr: resource / 25000}
+	sh := resource / 25000
+	if sh > ship.LargeCargo/25000 {
+		sh = resource / 5000
+	}
+	q := ogame.Quantifiable{ID: ogame.LargeCargoID, Nbr: sh}
 	quantList = append(quantList, q)
 	bot.SendFleet(id, quantList, 100, where, ogame.Attack, ogame.Resources{}, 0, 0)
 	return true
@@ -173,9 +190,16 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 		bot.BuildBuilding(id, ogame.ShipyardID)
 	}
 
+	if fac.MissileSilo < 8 {
+		bot.BuildBuilding(id, ogame.MissileSiloID)
+	}
+
+	bot.BuildDefense(id, ogame.AntiBallisticMissilesID, 10)
+	bot.BuildDefense(id, ogame.SmallShieldDomeID, 1)
+	bot.BuildDefense(id, ogame.LargeShieldDomeID, 1)
 	bot.BuildBuilding(id, ogame.NaniteFactoryID)
 	bot.BuildBuilding(id, ogame.TerraformerID)
-	if resource.Energy < 0 {
+	if resource.Energy < 12 {
 		bot.BuildBuilding(id, ogame.SolarPlantID)
 	} else if res.MetalMine < res.CrystalMine+4 {
 		bot.BuildBuilding(id, ogame.MetalStorageID)
@@ -188,21 +212,33 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 		bot.BuildBuilding(id, ogame.DeuteriumSynthesizerID)
 	}
 
-	coutTerraform := 100000 * math.Pow(2.0, float64(fac.Terraformer))
-	if resource.Deuterium > int64(coutTerraform) && fac.ResearchLab < 1 {
+	//coutTerraform := 100000 * math.Pow(2.0, float64(fac.Terraformer))
+	/*if resource.Deuterium > int64(coutTerraform) && fac.ResearchLab < 1 {
 		bot.BuildDefense(id, ogame.PlasmaTurretID, 1)
 		fmt.Println("building plasma...")
-	}
+	}*/
 
 	if fac.SpaceDock < 7 {
 		bot.BuildBuilding(id, ogame.SpaceDockID)
 	}
 
-	if detres.Metal.Available > detres.Metal.StorageCapacity {
-		nb := (detres.Metal.Available - detres.Metal.StorageCapacity) / 2000
-		bot.BuildDefense(id, ogame.RocketLauncherID, nb)
+	diffmetal := detres.Metal.Available - detres.Metal.StorageCapacity
+	diffcrystal := detres.Crystal.Available - detres.Crystal.StorageCapacity
+	diffdeut := detres.Deuterium.Available - detres.Deuterium.StorageCapacity
+	resdiff := ogame.Resources{Metal: 0, Crystal: 0, Deuterium: 0}
+	if diffmetal >= 0 {
+		resdiff.Metal = 500000 + diffmetal
+	}
+	if diffcrystal >= 0 {
+		resdiff.Crystal = 500000 + diffcrystal
+	}
+	if diffdeut >= 0 {
+		resdiff.Deuterium = 500000 + diffdeut
 	}
 
+	if len(bot.GetMoons()) > 0 {
+		transporter(id, bot.GetMoons()[0].Coordinate, resdiff)
+	}
 	consInBuild, ctInBld, resinbuild, countres := bot.ConstructionsBeingBuilt(id)
 	time := fmt.Sprintf("%dh %dmn %ds", ctInBld/3600, (ctInBld%3600)/60, ctInBld%60)
 	var planetinfo PlaneteInfos
@@ -218,13 +254,24 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 }
 
 func setresearch(id ogame.CelestialID) map[string]interface{} {
-	bot.BuildTechnology(id, ogame.AstrophysicsID)
-	bot.BuildTechnology(id, ogame.IntergalacticResearchNetworkID)
 	res := bot.GetResearch()
 	fac, _ := bot.GetFacilities(id)
+	mresearch := structs.Map(res)
+	mr := make(map[string]interface{})
+	for k, v := range mresearch {
+		if v.(int64) != 0 {
+			mr[strings.Replace(k, "Technology", "", -1)] = v
+		}
+	}
+
 	if fac.ResearchLab < 12 {
 		bot.BuildBuilding(id, ogame.ResearchLabID)
 	}
+
+	bot.BuildBuilding(id, ogame.ComputerTechnologyID)
+	bot.BuildTechnology(id, ogame.AstrophysicsID)
+	bot.BuildTechnology(id, ogame.IntergalacticResearchNetworkID)
+	fmt.Println("Recherche...")
 	if res.EnergyTechnology < 8 {
 		bot.BuildTechnology(id, ogame.EnergyTechnologyID)
 	}
@@ -252,48 +299,26 @@ func setresearch(id ogame.CelestialID) map[string]interface{} {
 	bot.BuildTechnology(id, ogame.PlasmaTechnologyID)
 	bot.BuildTechnology(id, ogame.WeaponsTechnologyID)
 	bot.BuildTechnology(id, ogame.ShieldingTechnology.ID)
-	mresearch := structs.Map(res)
-	mr := make(map[string]interface{})
-	for k, v := range mresearch {
-		if v.(int64) != 0 {
-			mr[strings.Replace(k, "Technology", "", -1)] = v
-		}
-	}
 
 	return mr
 }
 
-func transporter(id ogame.CelestialID, idwhere ogame.Coordinate) {
+func transporter(id ogame.CelestialID, idwhere ogame.Coordinate, resource ogame.Resources) {
 	ships, _ := bot.GetShips(id)
-	if ships.LargeCargo < 5 {
+	if ships.LargeCargo < 60 {
 		return
 	}
-	res, _ := bot.GetResources(id)
-	fac, _ := bot.GetFacilities(id)
-	if res.Deuterium > (100000*fac.Terraformer + 100000) {
-		q := ogame.Quantifiable{ID: ogame.LargeCargoID, Nbr: 5}
-		var quantList []ogame.Quantifiable
-		quantList = append(quantList, q)
-		co := ogame.Coordinate{Galaxy: idwhere.Galaxy, System: idwhere.System,
-			Position: idwhere.Position}
-		bot.SendFleet(id, quantList, 100, co, ogame.Transport,
-			ogame.Resources{Deuterium: 100000}, 0, 0)
-		fmt.Println("transport de déuterium vers:", idwhere)
+	if resource.Metal == 0 && resource.Crystal == 0 && resource.Deuterium == 0 {
+		return
 	}
-}
-
-func add(a int, b int) int {
-	return (a + b)
-}
-
-func sub(a int, b int) int {
-	return (a - b)
-}
-
-func mul(a int, b int) int {
-	return (a * b)
-}
-
-func div(a int, b int) int {
-	return (a / b)
+	//if res.Deuterium > (100000*fac.Terraformer + 100000) {
+	q := ogame.Quantifiable{ID: ogame.LargeCargoID, Nbr: 60}
+	var quantList []ogame.Quantifiable
+	quantList = append(quantList, q)
+	co := ogame.Coordinate{Galaxy: idwhere.Galaxy, System: idwhere.System,
+		Position: idwhere.Position}
+	bot.SendFleet(id, quantList, 100, co, ogame.Transport,
+		resource, 0, 0)
+	fmt.Println("transport de déuterium vers:", idwhere)
+	//}
 }

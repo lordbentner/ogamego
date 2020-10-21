@@ -1,8 +1,12 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"math"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -24,15 +28,30 @@ var (
 var TimeDeconnecte []time.Time
 var items GlobalList
 var RapportEspionnage []map[string]interface{}
+var mlogin Login
+var Logout = false
+var BuildLune []map[string]interface{}
 
-func getTimeInGame() string {
-	if !bot.IsConnected() || !bot.IsLoggedIn() {
+func getTimeInGame() (string, string) {
+	jsonfile, err := os.Open("data.json")
+	bytevalue, _ := ioutil.ReadAll(jsonfile)
+	json.Unmarshal(bytevalue, &mlogin)
+	fmt.Println("Login user:", mlogin.User, " password:", mlogin.Password)
+	if bot == nil {
 		startLog = time.Now()
-		return "Non Connecté!"
+		if err != nil {
+			fmt.Println(err)
+			return "Erreur lecture de fichier json!", ""
+		}
+		bot, err = ogame.New(mlogin.Universe, mlogin.User, mlogin.Password, "fr")
+		if err != nil {
+			panic(err)
+		}
+		return "Non Connecté!", ""
 	}
 
 	currentTime := time.Now()
-	return currentTime.Sub(startLog).String()
+	return currentTime.Sub(startLog).String(), mlogin.User
 }
 
 func satProduction(id ogame.PlanetID) {
@@ -48,10 +67,22 @@ func satProduction(id ogame.PlanetID) {
 }
 
 func launch() {
-	var gal int64 = 3
-	var sys int64 = 64
+	var gal int64 = 4
+	var sys int64 = 2
 	for {
+		if Logout {
+			fmt.Println("Déconnecté!!")
+			break
+		}
+		items.points = bot.GetUserInfos().Points
 		items.planetes = bot.GetPlanets()
+		items.lunes = bot.GetMoons()
+		BuildLune = nil
+		for _, lune := range items.lunes {
+			id := ogame.CelestialID(lune.ID)
+			botfac, _ := bot.GetFacilities(id)
+			BuildLune = append(BuildLune, structs.Map(botfac))
+		}
 		fl, _ := bot.GetFleets()
 		stres := bot.GetResearch()
 		items.planetinfos = nil
@@ -74,6 +105,12 @@ func launch() {
 			items.fleets[j] = structs.Map(fle)
 		}
 
+		for _, lune := range items.lunes {
+			id := ogame.CelestialID(lune.ID)
+			bot.BuildBuilding(id, ogame.LunarBaseID)
+			bot.BuildBuilding(id, ogame.SensorPhalanxID)
+		}
+
 		for _, planete := range items.planetes {
 			id := ogame.CelestialID(planete.ID)
 			gestionUnderAttack(id)
@@ -85,14 +122,14 @@ func launch() {
 			items.consInBuild[i] = plinfo.consInBuild
 			items.countInBuild[i] = plinfo.countInBuild
 			satProduction(planete.ID)
+			items.ships[i] = setShips(id)
 			inter := stres.IntergalacticResearchNetwork
 			if i <= int(inter) {
 				items.researchs = setresearch(id)
-			} else {
-				transporter(id, items.planetes[0].Coordinate)
-			}
+			} /*else {
+				transporter(id, items.planetes[i].Coordinate)
+			}*/
 
-			items.ships[i] = setShips(id)
 			if sys >= 500 {
 				sys = 1
 				gal++
@@ -101,15 +138,14 @@ func launch() {
 				gal = 1
 			}
 
+			fmt.Println("Vaisseaux:", items.ships[i])
 			comput := items.researchs["Computer"].(int64)
 			if len(fl) < int(comput) {
 				gestionEspionnage(id, gal, sys)
 				gestionrapport(id)
 				sys++
 			}
-
 			//setExpedition(id, planete.Coordinate)
-
 			i++
 		}
 	}
@@ -131,6 +167,8 @@ func buildPage(ctx *macaron.Context, req *http.Request, elInPage int, nbItem int
 		nbPages = append(nbPages, i+1)
 	}
 
-	ctx.Data["time_con"] = getTimeInGame()
+	time, user := getTimeInGame()
+	ctx.Data["time_con"] = time
+	ctx.Data["user"] = user
 	ctx.Data["nbPages"] = nbPages
 }

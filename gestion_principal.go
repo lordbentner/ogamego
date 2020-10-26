@@ -16,6 +16,7 @@ type PlaneteInfos struct {
 	ships             ogame.ShipsInfos
 	consInBuild       ogame.ID
 	countInBuild      string
+	productions       map[string]interface{}
 }
 
 type Login struct {
@@ -36,6 +37,7 @@ type GlobalList struct {
 	res_build          []map[string]interface{}
 	ships              []map[string]interface{}
 	detailsRessources  []map[string]interface{}
+	productions        []map[string]interface{}
 	consInBuild        []ogame.ID
 	countInBuild       []string
 	researchInBuild    ogame.ID
@@ -43,15 +45,29 @@ type GlobalList struct {
 	points             int64
 }
 
-func gestionUnderAttack(id ogame.CelestialID) {
-	isAttack, _ := bot.IsUnderAttack()
+func gestionUnderAttack(id ogame.CelestialID) []map[string]interface{} {
+	//isAttack, _ := bot.IsUnderAttack()
+	listattack, _ := bot.GetAttacks()
+	var mapAttack []map[string]interface{}
 	var i ogame.ID
-	if isAttack {
+	for _, attack := range listattack {
+		mapAttack = append(mapAttack, structs.Map(attack))
+		for _, planet := range items.planetes {
+			if attack.Destination.System == planet.Coordinate.System {
+				for i = 408; i > 400; i-- {
+					bot.BuildDefense(planet.GetID(), i, 10000)
+				}
+			}
+		}
+	}
+	/*if isAttack {
 		fmt.Println("ON EST ATTAQUES!!!!")
 		for i = 408; i > 400; i-- {
 			bot.BuildDefense(id, i, 10000)
 		}
-	}
+	}*/
+
+	return mapAttack
 }
 
 func setExpedition(id ogame.CelestialID, coord ogame.Coordinate) {
@@ -81,20 +97,9 @@ func gestionrapport(id ogame.CelestialID) {
 	var Rapport []map[string]interface{}
 	for _, er := range erm {
 		if er.Type == ogame.Report {
-			for _, coord := range items.planetes {
-				if coord.Coordinate.Galaxy == er.Target.Galaxy &&
-					coord.Coordinate.System == er.Target.System &&
-					coord.Coordinate.Position == er.Target.Position {
-					msg, _ := bot.GetEspionageReport(er.ID)
-					re := structs.Map(msg)
-					Rapport = append(Rapport, re)
-					fmt.Println("attaque detectés!!:", Rapport)
-				}
-			}
-
 			msgR, _ := bot.GetEspionageReport(er.ID)
 			totalres := msgR.Resources.Deuterium + msgR.Resources.Metal + msgR.Resources.Crystal
-			if msgR.HasDefensesInformation == false || msgR.HasFleetInformation == false || totalres < 1000000 {
+			if msgR.HasDefensesInformation == false || msgR.HasFleetInformation == false || totalres < 2000000 {
 				bot.DeleteMessage(er.ID)
 				return
 			}
@@ -147,13 +152,13 @@ func gestionEspionnage(id ogame.CelestialID, gal int64, sys int64) {
 
 func setShips(id ogame.CelestialID) map[string]interface{} {
 	ships, _ := bot.GetShips(id)
-	if ships.EspionageProbe < 30 {
+	/*if ships.EspionageProbe < 30 {
 		bot.BuildShips(id, ogame.EspionageProbeID, 1)
 	}
 
 	if ships.LargeCargo < 100 {
 		bot.BuildShips(id, ogame.LargeCargoID, 1)
-	}
+	}*/
 
 	sh := structs.Map(ships)
 	return sh
@@ -182,11 +187,12 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 	resource, _ := bot.GetResources(id)
 	fac, _ := bot.GetFacilities(id)
 	detres, _ := bot.GetResourcesDetails(id)
+	bot.BuildBuilding(id, ogame.NaniteFactoryID)
 	if fac.RoboticsFactory < 10 {
 		bot.BuildBuilding(id, ogame.RoboticsFactoryID)
 	}
 
-	if fac.Shipyard < 8 {
+	if fac.Shipyard < 12 {
 		bot.BuildBuilding(id, ogame.ShipyardID)
 	}
 
@@ -197,7 +203,6 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 	bot.BuildDefense(id, ogame.AntiBallisticMissilesID, 10)
 	bot.BuildDefense(id, ogame.SmallShieldDomeID, 1)
 	bot.BuildDefense(id, ogame.LargeShieldDomeID, 1)
-	bot.BuildBuilding(id, ogame.NaniteFactoryID)
 	bot.BuildBuilding(id, ogame.TerraformerID)
 	if resource.Energy < 12 {
 		bot.BuildBuilding(id, ogame.SolarPlantID)
@@ -211,12 +216,6 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 		bot.BuildBuilding(id, ogame.DeuteriumTankID)
 		bot.BuildBuilding(id, ogame.DeuteriumSynthesizerID)
 	}
-
-	//coutTerraform := 100000 * math.Pow(2.0, float64(fac.Terraformer))
-	/*if resource.Deuterium > int64(coutTerraform) && fac.ResearchLab < 1 {
-		bot.BuildDefense(id, ogame.PlasmaTurretID, 1)
-		fmt.Println("building plasma...")
-	}*/
 
 	if fac.SpaceDock < 7 {
 		bot.BuildBuilding(id, ogame.SpaceDockID)
@@ -236,11 +235,17 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 		resdiff.Deuterium = 500000 + diffdeut
 	}
 
+	fmt.Println("ressource:", resdiff)
 	if len(bot.GetMoons()) > 0 {
 		transporter(id, bot.GetMoons()[0].Coordinate, resdiff)
 	}
 	consInBuild, ctInBld, resinbuild, countres := bot.ConstructionsBeingBuilt(id)
 	time := fmt.Sprintf("%dh %dmn %ds", ctInBld/3600, (ctInBld%3600)/60, ctInBld%60)
+	prod, nb, _ := bot.GetProduction(id)
+	var listprod []map[string]interface{}
+	for _, pr := range prod {
+		listprod = append(listprod, structs.Map(pr))
+	}
 	var planetinfo PlaneteInfos
 	planetinfo.res_build = structs.Map(res)
 	planetinfo.resources = structs.Map(resource)
@@ -248,6 +253,8 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 	planetinfo.detailsRessources = structs.Map(detres)
 	planetinfo.consInBuild = consInBuild
 	planetinfo.countInBuild = time
+	planetinfo.productions = structs.Map(listprod)
+	planetinfo.productions["nombre"] = nb
 	items.researchInBuild = resinbuild
 	items.countResearchBuild = fmt.Sprintf("%dh %dmn %ds", countres/3600, (countres%3600)/60, countres%60)
 	return planetinfo
@@ -299,7 +306,6 @@ func setresearch(id ogame.CelestialID) map[string]interface{} {
 	bot.BuildTechnology(id, ogame.PlasmaTechnologyID)
 	bot.BuildTechnology(id, ogame.WeaponsTechnologyID)
 	bot.BuildTechnology(id, ogame.ShieldingTechnology.ID)
-
 	return mr
 }
 
@@ -308,17 +314,17 @@ func transporter(id ogame.CelestialID, idwhere ogame.Coordinate, resource ogame.
 	if ships.LargeCargo < 60 {
 		return
 	}
+
 	if resource.Metal == 0 && resource.Crystal == 0 && resource.Deuterium == 0 {
 		return
 	}
-	//if res.Deuterium > (100000*fac.Terraformer + 100000) {
+
 	q := ogame.Quantifiable{ID: ogame.LargeCargoID, Nbr: 60}
 	var quantList []ogame.Quantifiable
 	quantList = append(quantList, q)
 	co := ogame.Coordinate{Galaxy: idwhere.Galaxy, System: idwhere.System,
-		Position: idwhere.Position}
+		Position: idwhere.Position, Type: ogame.MoonType}
 	bot.SendFleet(id, quantList, 100, co, ogame.Transport,
 		resource, 0, 0)
-	fmt.Println("transport de déuterium vers:", idwhere)
-	//}
+	fmt.Println("transport de ressources vers:", idwhere, "avec:", resource)
 }

@@ -28,30 +28,30 @@ var (
 var TimeDeconnecte []time.Time
 var items GlobalList
 var RapportEspionnage []map[string]interface{}
-var mlogin Login
 var Logout = false
 var BuildLune []map[string]interface{}
+var vlistAttack []map[string]interface{}
 
-func getTimeInGame() (string, string) {
+func getJSONlogin() Login {
 	jsonfile, err := os.Open("data.json")
 	bytevalue, _ := ioutil.ReadAll(jsonfile)
+	var mlogin Login
 	json.Unmarshal(bytevalue, &mlogin)
-	fmt.Println("Login user:", mlogin.User, " password:", mlogin.Password)
+	if err != nil {
+		panic(err)
+	}
+
+	return mlogin
+}
+
+func getTimeInGame() (string, string) {
+	login := getJSONlogin()
 	if bot == nil {
-		startLog = time.Now()
-		if err != nil {
-			fmt.Println(err)
-			return "Erreur lecture de fichier json!", ""
-		}
-		bot, err = ogame.New(mlogin.Universe, mlogin.User, mlogin.Password, "fr")
-		if err != nil {
-			panic(err)
-		}
 		return "Non Connecté!", ""
 	}
 
 	currentTime := time.Now()
-	return currentTime.Sub(startLog).String(), mlogin.User
+	return currentTime.Sub(startLog).String(), login.User
 }
 
 func satProduction(id ogame.PlanetID) {
@@ -74,6 +74,16 @@ func launch() {
 			fmt.Println("Déconnecté!!")
 			break
 		}
+
+		login := getJSONlogin()
+		if bot == nil {
+			startLog = time.Now()
+			bot, err = ogame.New(login.Universe, login.User, login.Password, "fr")
+			if err != nil {
+				panic(err)
+			}
+		}
+
 		items.points = bot.GetUserInfos().Points
 		items.planetes = bot.GetPlanets()
 		items.lunes = bot.GetMoons()
@@ -95,6 +105,7 @@ func launch() {
 			items.detailsRessources = make([]map[string]interface{}, len(items.planetes))
 			items.consInBuild = make([]ogame.ID, len(items.planetes))
 			items.countInBuild = make([]string, len(items.planetes))
+			items.productions = make([]map[string]interface{}, len(items.planetes))
 		}
 
 		if len(items.fleets) < len(fl) {
@@ -113,7 +124,7 @@ func launch() {
 
 		for _, planete := range items.planetes {
 			id := ogame.CelestialID(planete.ID)
-			gestionUnderAttack(id)
+			vlistAttack = gestionUnderAttack(id)
 			plinfo := gestionGlobal(id)
 			items.facilities[i] = plinfo.facilities
 			items.resources[i] = plinfo.resources
@@ -121,6 +132,7 @@ func launch() {
 			items.detailsRessources[i] = plinfo.detailsRessources
 			items.consInBuild[i] = plinfo.consInBuild
 			items.countInBuild[i] = plinfo.countInBuild
+			items.productions[i] = plinfo.productions
 			satProduction(planete.ID)
 			items.ships[i] = setShips(id)
 			inter := stres.IntergalacticResearchNetwork

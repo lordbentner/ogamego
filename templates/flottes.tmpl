@@ -12,8 +12,9 @@
 		<a class="nav-item nav-link" href="/databoard">Tableau de bord</a>
 		<a class="nav-item nav-link" href="/rapports">Rapport</a>
 		<a class="nav-item nav-link active" href="/flottes">Flottes info</a>
-        <span class="navbar-text">Temps de reconnection: {{.time_con}}</span>
-        <span class="navbar-text"> {{.point}} points</span>
+        <span class="navbar-text">Temps de connexion: {{.time_con}}</span>
+        <span class="navbar-text">{{.point}} points</span>
+        <span class="navbar-text text-lg-right">Connecté en tant que {{.user}}</span>
         <a class="navbar-brand nav-link bg-danger" href="/quit">Quitter</a>
 	</nav>
     <div class="card text-center border border-primary flottes d-flex flex-column align-items-center">

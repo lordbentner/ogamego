@@ -17,19 +17,19 @@
 }
 
 .databoard {
-    background-image: url("/images/imagescroiseur.jpg");  
+    background-image: url("/images/imagesedlm.jpg");  
     background-repeat: no-repeat;
     background-size: cover;
 }
 
 .flottes {
-    background-image: url("/images/ogame-test.png");
+    background-image: url("/images/flottes.jpg");
     background-repeat: no-repeat;
     background-size: cover;
 }
 
 .rapport {
-    background-image: url("/images/imagesedlm.jpg");
+    background-image: url("/images/attack.jpg");
     background-repeat: no-repeat;
     background-size: cover;
 }

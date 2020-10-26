@@ -8,12 +8,13 @@
     <title>Ogame Bot</title>
 </head>
 <body class="h-100">
-<nav class="nav nav-pills nav-pill font-weight-bold bg-info">
+<nav class="nav nav-pills nav-pill font-weight-bold bg-info justify-content-between">
     <a class="nav-item nav-link" href="/databoard">Tableau de bord</a>
     <a class="nav-item nav-link active" href="/rapports">Rapport</a>
     <a class="nav-item nav-link" href="/flottes">Flottes info</a>
-    <span class="navbar-text">Temps de reconnection: {{.time_con}}</span>
-    <span class="navbar-text"> {{.point}} points</span>
+    <span class="navbar-text">Temps de connexion: {{.time_con}}</span>
+    <span class="navbar-text">{{.point}} points</span>
+    <span class="navbar-text text-lg-right">Connecté en tant que {{.user}}</span>
     <a class="navbar-brand nav-link bg-danger" href="/quit">Quitter</a>
 </nav>
 <div class="card h-100 d-flex flex-column align-items-center rapport">

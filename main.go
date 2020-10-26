@@ -3,7 +3,6 @@ package main
 //https://ogamebot.uc.r.appspot.com
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,15 +15,6 @@ import (
 	"gopkg.in/macaron.v1"
 )
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
-
-	fmt.Fprint(w, "Hello, World!")
-}
-
 func main() {
 	m := macaron.Classic()
 	m.Use(macaron.Renderer())
@@ -36,8 +26,8 @@ func main() {
 			ctx.Redirect("/")
 		} else {
 			bot, err = ogame.New(login.Universe, login.User, login.Password, "fr")
-			file, _ := json.MarshalIndent(login, "", "login")
-			_ = ioutil.WriteFile("data.json", file, 0644)
+			file, _ := json.Marshal(login)
+			_ = ioutil.WriteFile("data.json", file, 0777)
 			if err != nil {
 				panic(err)
 			} else {
@@ -63,6 +53,7 @@ func main() {
 		ctx.Data["countInBuild"] = items.countInBuild
 		ctx.Data["resInBuild"] = items.researchInBuild
 		ctx.Data["countResInBuild"] = items.countResearchBuild
+		ctx.Data["productions"] = items.productions
 		time, user := getTimeInGame()
 		ctx.Data["time_con"] = time
 		ctx.Data["user"] = user
@@ -80,7 +71,7 @@ func main() {
 
 	m.Get("/rapports", func(ctx *macaron.Context, req *http.Request) {
 		buildPage(ctx, req, 15, len(RapportEspionnage))
-		ctx.Data["spy"] = RapportEspionnage
+		ctx.Data["spy"] = vlistAttack
 		ctx.Data["point"] = items.points
 		ctx.HTML(200, "rapports")
 	})

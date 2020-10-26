@@ -13,7 +13,8 @@
 		<a class="navbar-brand nav-link" href="/rapports">Rapport</a>
 		<a class="navbar-brand nav-link" href="/flottes">Flottes info</a>	
 		<span class="navbar-text text-lg-right">Temps de connexion: {{.time_con}}</span>
-		<span class="navbar-text text-lg-right"> {{.point}} points</span>
+		<span class="navbar-text text-lg-right">{{.point}} points</span>
+		<span class="navbar-text text-lg-right">Connecté en tant que {{.user}}</span>
 		<a class="navbar-brand nav-link bg-danger" href="/quit">Quitter</a>
 	</nav>
 	<div class="card border border-primary d-flex justify-content-center databoard">
@@ -99,7 +100,15 @@
 					{{range $key, $val := .countInBuild}}						
 						<td>{{index $.consInBuild $key}}: {{$val}} sec</td>
 					{{end}}
-				</tr>								
+				</tr>
+				<tr><th scope="row">Productions en cours</h4></th>
+					{{range .productions}}
+						<td>{{range $key, $val := .}}
+							<p>{{$key}}: {{$val}}</p>
+							{{end}}
+						</td>
+					{{end}}
+				</tr>							
 		</table>
 	</div>
 </body>

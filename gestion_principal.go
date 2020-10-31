@@ -6,6 +6,7 @@ import (
 
 	"github.com/alaingilbert/ogame"
 	"github.com/fatih/structs"
+	"github.com/stretchr/stew/slice"
 )
 
 type PlaneteInfos struct {
@@ -16,7 +17,8 @@ type PlaneteInfos struct {
 	ships             ogame.ShipsInfos
 	consInBuild       ogame.ID
 	countInBuild      string
-	productions       map[string]interface{}
+	countProductions  string
+	productions       map[ogame.ID]int64
 }
 
 type Login struct {
@@ -37,21 +39,21 @@ type GlobalList struct {
 	res_build          []map[string]interface{}
 	ships              []map[string]interface{}
 	detailsRessources  []map[string]interface{}
-	productions        []map[string]interface{}
+	productions        []map[ogame.ID]int64
 	consInBuild        []ogame.ID
 	countInBuild       []string
 	researchInBuild    ogame.ID
 	countResearchBuild string
+	countProductions   []string
 	points             int64
+	lastEspionnage     [2]int64
 }
 
-func gestionUnderAttack(id ogame.CelestialID) []map[string]interface{} {
-	//isAttack, _ := bot.IsUnderAttack()
+func gestionUnderAttack(id ogame.CelestialID) {
 	listattack, _ := bot.GetAttacks()
-	var mapAttack []map[string]interface{}
 	var i ogame.ID
 	for _, attack := range listattack {
-		mapAttack = append(mapAttack, structs.Map(attack))
+		vlistAttack = append(vlistAttack, structs.Map(attack))
 		for _, planet := range items.planetes {
 			if attack.Destination.System == planet.Coordinate.System {
 				for i = 408; i > 400; i-- {
@@ -60,24 +62,20 @@ func gestionUnderAttack(id ogame.CelestialID) []map[string]interface{} {
 			}
 		}
 	}
-	/*if isAttack {
-		fmt.Println("ON EST ATTAQUES!!!!")
-		for i = 408; i > 400; i-- {
-			bot.BuildDefense(id, i, 10000)
-		}
-	}*/
-
-	return mapAttack
 }
 
 func setExpedition(id ogame.CelestialID, coord ogame.Coordinate) {
 	sh, _ := bot.GetShips(id)
+	if sh.EspionageProbe > 50 {
+		return
+	}
+
 	q := ogame.Quantifiable{ID: ogame.EspionageProbeID, Nbr: 10}
 	r := ogame.Quantifiable{ID: ogame.LargeCargoID, Nbr: sh.LargeCargo}
+	s := ogame.Quantifiable{ID: ogame.SmallCargoID, Nbr: sh.SmallCargo}
 	co := ogame.Coordinate{Galaxy: coord.Galaxy, System: coord.System, Position: 16}
 	var quantList []ogame.Quantifiable
-	quantList = append(quantList, q)
-	quantList = append(quantList, r)
+	quantList = append(quantList, q, r, s)
 	bot.SendFleet(id, quantList, 100, co, ogame.Expedition, ogame.Resources{}, 0, 0)
 }
 
@@ -242,9 +240,20 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 	consInBuild, ctInBld, resinbuild, countres := bot.ConstructionsBeingBuilt(id)
 	time := fmt.Sprintf("%dh %dmn %ds", ctInBld/3600, (ctInBld%3600)/60, ctInBld%60)
 	prod, nb, _ := bot.GetProduction(id)
-	var listprod []map[string]interface{}
+	listprod := make(map[ogame.ID]int64)
+	var listTypeprod []ogame.ID
 	for _, pr := range prod {
-		listprod = append(listprod, structs.Map(pr))
+		if !slice.Contains(listTypeprod, pr.ID) {
+			listTypeprod = append(listTypeprod, pr.ID)
+		}
+	}
+	for _, ltp := range listTypeprod {
+		listprod[ltp] = 0
+		for _, pr := range prod {
+			if ltp == pr.ID {
+				listprod[ltp] += pr.Nbr
+			}
+		}
 	}
 	var planetinfo PlaneteInfos
 	planetinfo.res_build = structs.Map(res)
@@ -253,8 +262,8 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 	planetinfo.detailsRessources = structs.Map(detres)
 	planetinfo.consInBuild = consInBuild
 	planetinfo.countInBuild = time
-	planetinfo.productions = structs.Map(listprod)
-	planetinfo.productions["nombre"] = nb
+	planetinfo.productions = listprod
+	planetinfo.countProductions = fmt.Sprintf("%dh %dmn %ds", nb/3600, (nb%3600)/60, nb%60)
 	items.researchInBuild = resinbuild
 	items.countResearchBuild = fmt.Sprintf("%dh %dmn %ds", countres/3600, (countres%3600)/60, countres%60)
 	return planetinfo
@@ -279,7 +288,7 @@ func setresearch(id ogame.CelestialID) map[string]interface{} {
 	bot.BuildTechnology(id, ogame.AstrophysicsID)
 	bot.BuildTechnology(id, ogame.IntergalacticResearchNetworkID)
 	fmt.Println("Recherche...")
-	if res.EnergyTechnology < 8 {
+	if res.EnergyTechnology < 12 {
 		bot.BuildTechnology(id, ogame.EnergyTechnologyID)
 	}
 

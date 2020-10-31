@@ -44,6 +44,18 @@ func getJSONlogin() Login {
 	return mlogin
 }
 
+func getJSONDataboard() GlobalList {
+	jsonfile, err := os.Open("databoard.json")
+	bytevalue, _ := ioutil.ReadAll(jsonfile)
+	var list GlobalList
+	json.Unmarshal(bytevalue, &list)
+	if err != nil {
+		panic(err)
+	}
+
+	return list
+}
+
 func getTimeInGame() (string, string) {
 	login := getJSONlogin()
 	if bot == nil {
@@ -67,20 +79,27 @@ func satProduction(id ogame.PlanetID) {
 }
 
 func launch() {
-	var gal int64 = 4
-	var sys int64 = 2
+	var gal int64 = 2
+	var sys int64 = 100
 	for {
 		if Logout {
 			fmt.Println("Déconnecté!!")
 			break
 		}
 
-		login := getJSONlogin()
 		if bot == nil {
+			fmt.Println("bot vide!!!!")
+			login := getJSONlogin()
 			startLog = time.Now()
 			bot, err = ogame.New(login.Universe, login.User, login.Password, "fr")
 			if err != nil {
 				panic(err)
+			}
+
+			for {
+				if bot != nil {
+					break
+				}
 			}
 		}
 
@@ -94,7 +113,6 @@ func launch() {
 			BuildLune = append(BuildLune, structs.Map(botfac))
 		}
 		fl, _ := bot.GetFleets()
-		stres := bot.GetResearch()
 		items.planetinfos = nil
 		i := 0
 		if len(items.planetes) > len(items.facilities) {
@@ -105,7 +123,8 @@ func launch() {
 			items.detailsRessources = make([]map[string]interface{}, len(items.planetes))
 			items.consInBuild = make([]ogame.ID, len(items.planetes))
 			items.countInBuild = make([]string, len(items.planetes))
-			items.productions = make([]map[string]interface{}, len(items.planetes))
+			items.productions = make([]map[ogame.ID]int64, len(items.planetes))
+			items.countProductions = make([]string, len(items.planetes))
 		}
 
 		if len(items.fleets) < len(fl) {
@@ -124,7 +143,8 @@ func launch() {
 
 		for _, planete := range items.planetes {
 			id := ogame.CelestialID(planete.ID)
-			vlistAttack = gestionUnderAttack(id)
+			items.researchs = setresearch(id)
+			gestionUnderAttack(id)
 			plinfo := gestionGlobal(id)
 			items.facilities[i] = plinfo.facilities
 			items.resources[i] = plinfo.resources
@@ -133,14 +153,9 @@ func launch() {
 			items.consInBuild[i] = plinfo.consInBuild
 			items.countInBuild[i] = plinfo.countInBuild
 			items.productions[i] = plinfo.productions
+			items.countProductions[i] = plinfo.countProductions
 			satProduction(planete.ID)
 			items.ships[i] = setShips(id)
-			inter := stres.IntergalacticResearchNetwork
-			if i <= int(inter) {
-				items.researchs = setresearch(id)
-			} /*else {
-				transporter(id, items.planetes[i].Coordinate)
-			}*/
 
 			if sys >= 500 {
 				sys = 1
@@ -157,9 +172,15 @@ func launch() {
 				gestionrapport(id)
 				sys++
 			}
-			//setExpedition(id, planete.Coordinate)
+
+			items.lastEspionnage[0] = gal
+			items.lastEspionnage[1] = sys
+			setExpedition(id, planete.Coordinate)
 			i++
 		}
+
+		file, _ := json.Marshal(items)
+		_ = ioutil.WriteFile("databoard.json", file, 0777)
 	}
 }
 
@@ -183,4 +204,5 @@ func buildPage(ctx *macaron.Context, req *http.Request, elInPage int, nbItem int
 	ctx.Data["time_con"] = time
 	ctx.Data["user"] = user
 	ctx.Data["nbPages"] = nbPages
+	ctx.Data["point"] = items.points
 }

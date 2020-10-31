@@ -29,36 +29,37 @@
                 </ul>
             </nav>
         </div>
-    <table class="table table-bordered table-dark">
-        <thead>
-            <tr>{{if gt (len .flottes) 0}}
-                    {{range $key, $val := index .flottes 0}}
-                        <th scope="row">{{$key}}</th>
-                    {{end}}
-                {{end}}
-            </tr>
-        </thead>
-        <tbody>
-            {{range $ind, $value := .flottes}}              
-                {{if and (le $ind $.lElem) (gt $ind $.fElem)}}
-                <tr>
-                    {{range $key, $val := $value}}
-                        {{if eq (printf "%T" $val) "map[string]interface {}"}}		
-                                <td>{{range $keys, $vals := $val}}
-                                        {{if ne $vals 0}}
-                                            <p><u>{{$keys}}</u>: {{$vals}}</p>
-                                        {{end}}
-                                    {{end}}
-                                </td>
-                        {{else}}
-                            <td>{{.}}</td>
+        <table class="table table-bordered bg-transparent text-white font-weight-bold">
+            <thead>
+                <tr><th scope="row">#</th>
+                    {{if gt (len .flottes) 0}}
+                        {{range $key, $val := index .flottes 0}}
+                            <th scope="row"><h5>{{$key}}</h5></th>
                         {{end}}
                     {{end}}
                 </tr>
-                {{end}}                      
-            {{end}}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {{range $ind, $value := .flottes}}              
+                    {{if and (lt $ind $.lElem) (ge $ind $.fElem)}}
+                    <tr><td>{{$ind}}</td>
+                        {{range $key, $val := $value}}
+                            {{if eq (printf "%T" $val) "map[string]interface {}"}}		
+                                    <td>{{range $keys, $vals := $val}}
+                                            {{if ne $vals 0}}
+                                                <p><u>{{$keys}}</u>: {{$vals}}</p>
+                                            {{end}}
+                                        {{end}}
+                                    </td>
+                            {{else}}
+                                <td>{{.}}</td>
+                            {{end}}
+                        {{end}}
+                    </tr>
+                    {{end}}                      
+                {{end}}
+            </tbody>
+        </table>
     </div>
 </body>
 </html>

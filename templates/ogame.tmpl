@@ -18,7 +18,7 @@
 		<a class="navbar-brand nav-link bg-danger" href="/quit">Quitter</a>
 	</nav>
 	<div class="card border border-primary d-flex justify-content-center databoard">
-	<div class="card-title text-center"><h4>niveau des recherches</h4></div>
+	<div class="card-title text-center text-white"><h4>niveau des recherches</h4></div>
 	<div class="card-body">
 		<table class="table table-ordered table-info text-center">
 			<thead>
@@ -36,7 +36,26 @@
 				<tr><td><h5>Recherche en cours</h5> </td><td><b>{{.resInBuild}}:</b> {{.countResInBuild}} sec</td> </tr>
 			</tbody>
 		</table>
-		<div class="card-header text-center"><h4>Tableau général</h4></div>
+		<div class="card-header text-center text-white"><h4>Tableau général</h4></div>
+		<table class="table table-ordered table-secondary">
+			<thead>
+				<th scope="col">Lune</th>
+				<th scope="col">Installations</th>
+			</thead>
+			<tbody>
+				{{ range $key, $val := .lunes}}
+				<tr>
+					<td>{{$val.Coordinate}}</td>
+					<td>{{range $k, $v := index $.BuildLune $key}}
+							{{if ne $v 0}}
+								<p>{{$k}}: {{$v}}</p>
+							{{end}}
+						{{end}}
+					</td>			
+				</tr>
+				{{end}}
+			</tbody>
+		</table>
 		<table class="table table-ordered table-dark">
 			<thead>				
 			</thead>
@@ -44,19 +63,6 @@
 				<tr><th scope="row"><h4>Planète</h4></th>
 					{{ range .planetes }}
 						<td><b>{{.Name}}</b><p>{{.Coordinate}}</p>
-						{{$Co := .Coordinate}}
-							{{ range $.lunes}}
-								{{if and (eq .Coordinate.System $Co.System) (eq .Coordinate.Galaxy $Co.Galaxy) }}
-									<p>Lune: {{.Coordinate}}</p>
-									{{range $.BuildLune}}
-										{{range $key , $val := .}}
-											{{if ne $val 0}}
-												<p>{{$key}}: {{$val}}<p>
-											{{end}}
-										{{end}}
-									{{end}}
-								{{end}}	
-							{{end}}	
 						</td>								
 					{{end}}
 				</tr>
@@ -102,9 +108,10 @@
 					{{end}}
 				</tr>
 				<tr><th scope="row">Productions en cours</h4></th>
-					{{range .productions}}
-						<td>{{range $key, $val := .}}
-							<p>{{$key}}: {{$val}}</p>
+					{{range $k, $v := .productions}}					
+						<td><p>temps total: {{index $.countProductions $k}}</p>
+						{{range $key, $val := .}}
+								<p>{{if ge $key 0}}{{$key}}:{{end}} {{$val}}</p>
 							{{end}}
 						</td>
 					{{end}}

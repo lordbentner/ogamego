@@ -18,7 +18,7 @@
     <a class="navbar-brand nav-link bg-danger" href="/quit">Quitter</a>
 </nav>
 <div class="card h-100 d-flex flex-column align-items-center rapport">
-    <div class="card-header text-center text-white"><h4>Nombre et infos des rapport: {{ len .spy}}</h4></div>
+    <div class="card-header text-center text-white"><h4>Nombre et infos des attaques reçues: {{ len .spy}}</h4></div>
     <nav aria-label="Page navigation example">
         <ul class="pagination">
             {{range .nbPages}}
@@ -30,23 +30,30 @@
     <div class="card-body">
         <table class="table table-ordered table-dark text-center">
         <thead>
-            <tr>
-                <th scope="row">Coordonnées</th>
-                <th scope="row">Ressources</th>
+            <tr>{{if gt (len .spy) 0}}
+                    {{range $key, $val := index .spy 0}}
+                        <th scope="row">{{$key}}</th>
+                    {{end}}
+                {{end}}
             </tr>
         </thead>
         <tbody>
-            {{range $k,$v := .spy}}
-                {{ if and . (and (le $.fElem $k) (ge $.lElem $k))}}
-                <tr>
-                    <td>{{range $key,$val := .Coordinate }}
-                            {{$key}}: {{$val}} - 
+            {{range $ind,$v := .spy}}
+                {{if and (lt $ind $.lElem) (ge $ind $.fElem)}}
+                <tr>{{range $key,$val := $v }}
+                    <td>
+                         {{if eq (printf "%T" $val) "map[string]interface {}"}}
+                            {{range $cle, $value := $val}}
+                                 {{if ne $value 0}}
+                                    <p>{{$cle}}: {{$value}}</p>
+                                {{end}}
+                            {{end}}
+                           
+                        {{else}}
+                            <p> {{.}}</p>
                         {{end}}
                     </td>
-                    <td>{{range $key,$val := .Resources }}
-                            {{$key}}: {{$val}} -
-                        {{end}}
-                    </td>
+                    {{end}}
                 </tr>
                 {{end}}
             {{end}}

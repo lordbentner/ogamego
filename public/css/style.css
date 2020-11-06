@@ -17,7 +17,7 @@
 }
 
 .databoard {
-    background-image: url("/images/imagesedlm.jpg");  
+    background-image: url("/images/attack.jpg");  
     background-repeat: no-repeat;
     background-size: cover;
 }
@@ -29,7 +29,7 @@
 }
 
 .rapport {
-    background-image: url("/images/attack.jpg");
+    background-image: url("/images/imagesedlm.jpg");
     background-repeat: no-repeat;
     background-size: cover;
 }

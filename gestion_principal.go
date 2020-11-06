@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/alaingilbert/ogame"
 	"github.com/fatih/structs"
@@ -10,15 +11,16 @@ import (
 )
 
 type PlaneteInfos struct {
-	facilities        map[string]interface{}
-	resources         map[string]interface{}
-	res_build         map[string]interface{}
-	detailsRessources map[string]interface{}
-	ships             ogame.ShipsInfos
-	consInBuild       ogame.ID
-	countInBuild      string
-	countProductions  string
-	productions       map[ogame.ID]int64
+	Planetes          ogame.Planet
+	Facilities        map[string]interface{}
+	Resources         map[string]interface{}
+	Res_build         map[string]interface{}
+	DetailsRessources map[string]interface{}
+	Ships             map[string]interface{}
+	ConsInBuild       ogame.ID
+	CountInBuild      string
+	CountProductions  string
+	Productions       map[ogame.ID]int64
 }
 
 type Login struct {
@@ -33,7 +35,7 @@ type GlobalList struct {
 	lunes              []ogame.Moon
 	researchs          map[string]interface{}
 	fleets             []map[string]interface{}
-	planetinfos        map[string]PlaneteInfos
+	planetinfos        []PlaneteInfos
 	facilities         []map[string]interface{}
 	resources          []map[string]interface{}
 	res_build          []map[string]interface{}
@@ -48,6 +50,8 @@ type GlobalList struct {
 	points             int64
 	lastEspionnage     [2]int64
 }
+
+var mu sync.Mutex
 
 func gestionUnderAttack(id ogame.CelestialID) {
 	listattack, _ := bot.GetAttacks()
@@ -181,6 +185,8 @@ func gestionAttack(id ogame.CelestialID, resource int64, where ogame.Coordinate)
 }
 
 func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
+	mu.Lock()
+	defer mu.Unlock()
 	res, _ := bot.GetResourcesBuildings(id)
 	resource, _ := bot.GetResources(id)
 	fac, _ := bot.GetFacilities(id)
@@ -256,16 +262,20 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 		}
 	}
 	var planetinfo PlaneteInfos
-	planetinfo.res_build = structs.Map(res)
-	planetinfo.resources = structs.Map(resource)
-	planetinfo.facilities = structs.Map(fac)
-	planetinfo.detailsRessources = structs.Map(detres)
-	planetinfo.consInBuild = consInBuild
-	planetinfo.countInBuild = time
-	planetinfo.productions = listprod
-	planetinfo.countProductions = fmt.Sprintf("%dh %dmn %ds", nb/3600, (nb%3600)/60, nb%60)
+	planetinfo.Res_build = structs.Map(res)
+	planetinfo.Resources = structs.Map(resource)
+	planetinfo.Facilities = structs.Map(fac)
+	planetinfo.DetailsRessources = structs.Map(detres)
+	planetinfo.Ships = setShips(id)
+	planetinfo.ConsInBuild = consInBuild
+	planetinfo.CountInBuild = time
+	planetinfo.Productions = listprod
+	//planetinfo.CountProductions = fmt.Sprintf("%dh %dmn %ds", nb/3600, (nb%3600)/60, nb%60)
+	planetinfo.CountProductions = secondsToHuman(int(nb))
 	items.researchInBuild = resinbuild
-	items.countResearchBuild = fmt.Sprintf("%dh %dmn %ds", countres/3600, (countres%3600)/60, countres%60)
+	//	items.countResearchBuild = fmt.Sprintf("%dh %dmn %ds", countres/3600, (countres%3600)/60, countres%60)
+	items.countResearchBuild = secondsToHuman(int(countres))
+
 	return planetinfo
 }
 

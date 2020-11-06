@@ -32,6 +32,11 @@ var Logout = false
 var BuildLune []map[string]interface{}
 var vlistAttack []map[string]interface{}
 
+type coordSpy struct {
+	Galaxy int64
+	System int64
+}
+
 func getJSONlogin() Login {
 	jsonfile, err := os.Open("data.json")
 	bytevalue, _ := ioutil.ReadAll(jsonfile)
@@ -44,16 +49,16 @@ func getJSONlogin() Login {
 	return mlogin
 }
 
-func getJSONDataboard() GlobalList {
+func getJSONDataboard() coordSpy {
 	jsonfile, err := os.Open("databoard.json")
 	bytevalue, _ := ioutil.ReadAll(jsonfile)
-	var list GlobalList
-	json.Unmarshal(bytevalue, &list)
+	var co coordSpy
+	json.Unmarshal(bytevalue, &co)
 	if err != nil {
 		panic(err)
 	}
 
-	return list
+	return co
 }
 
 func getTimeInGame() (string, string) {
@@ -79,8 +84,7 @@ func satProduction(id ogame.PlanetID) {
 }
 
 func launch() {
-	var gal int64 = 2
-	var sys int64 = 100
+	lastspy := getJSONDataboard()
 	for {
 		if Logout {
 			fmt.Println("Déconnecté!!")
@@ -113,7 +117,6 @@ func launch() {
 			BuildLune = append(BuildLune, structs.Map(botfac))
 		}
 		fl, _ := bot.GetFleets()
-		items.planetinfos = nil
 		i := 0
 		if len(items.planetes) > len(items.facilities) {
 			items.facilities = make([]map[string]interface{}, len(items.planetes))
@@ -141,45 +144,49 @@ func launch() {
 			bot.BuildBuilding(id, ogame.SensorPhalanxID)
 		}
 
+		if len(items.planetes) > len(items.planetinfos) {
+			items.planetinfos = make([]PlaneteInfos, len(items.planetes))
+		}
+
 		for _, planete := range items.planetes {
 			id := ogame.CelestialID(planete.ID)
 			items.researchs = setresearch(id)
 			gestionUnderAttack(id)
 			plinfo := gestionGlobal(id)
-			items.facilities[i] = plinfo.facilities
-			items.resources[i] = plinfo.resources
-			items.res_build[i] = plinfo.res_build
-			items.detailsRessources[i] = plinfo.detailsRessources
-			items.consInBuild[i] = plinfo.consInBuild
-			items.countInBuild[i] = plinfo.countInBuild
-			items.productions[i] = plinfo.productions
-			items.countProductions[i] = plinfo.countProductions
+			plinfo.Planetes = planete
+			items.planetinfos[i] = plinfo
+			items.facilities[i] = plinfo.Facilities
+			items.resources[i] = plinfo.Resources
+			items.res_build[i] = plinfo.Res_build
+			items.detailsRessources[i] = plinfo.DetailsRessources
+			items.consInBuild[i] = plinfo.ConsInBuild
+			items.countInBuild[i] = plinfo.CountInBuild
+			items.productions[i] = plinfo.Productions
+			items.countProductions[i] = plinfo.CountProductions
 			satProduction(planete.ID)
 			items.ships[i] = setShips(id)
 
-			if sys >= 500 {
-				sys = 1
-				gal++
+			if lastspy.System >= 500 {
+				lastspy.System = 1
+				lastspy.Galaxy++
 			}
-			if gal >= 5 {
-				gal = 1
+			if lastspy.Galaxy >= 5 {
+				lastspy.Galaxy = 1
 			}
 
 			fmt.Println("Vaisseaux:", items.ships[i])
 			comput := items.researchs["Computer"].(int64)
 			if len(fl) < int(comput) {
-				gestionEspionnage(id, gal, sys)
+				gestionEspionnage(id, lastspy.Galaxy, lastspy.System)
 				gestionrapport(id)
-				sys++
+				lastspy.System++
 			}
 
-			items.lastEspionnage[0] = gal
-			items.lastEspionnage[1] = sys
 			setExpedition(id, planete.Coordinate)
 			i++
 		}
 
-		file, _ := json.Marshal(items)
+		file, _ := json.Marshal(lastspy)
 		_ = ioutil.WriteFile("databoard.json", file, 0777)
 	}
 }

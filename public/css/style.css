@@ -4,6 +4,10 @@
     background-color: red;
 }
 
+.mybtn-white {
+    color : white;
+}
+
 .green {
     width: 10%;
     height: 50px;

@@ -21,6 +21,7 @@ type PlaneteInfos struct {
 	CountInBuild      string
 	CountProductions  string
 	Productions       map[ogame.ID]int64
+	Defenses          map[string]interface{}
 }
 
 type Login struct {
@@ -36,14 +37,6 @@ type GlobalList struct {
 	researchs          map[string]interface{}
 	fleets             []map[string]interface{}
 	planetinfos        []PlaneteInfos
-	facilities         []map[string]interface{}
-	resources          []map[string]interface{}
-	res_build          []map[string]interface{}
-	ships              []map[string]interface{}
-	detailsRessources  []map[string]interface{}
-	productions        []map[ogame.ID]int64
-	consInBuild        []ogame.ID
-	countInBuild       []string
 	researchInBuild    ogame.ID
 	countResearchBuild string
 	countProductions   []string
@@ -52,6 +45,7 @@ type GlobalList struct {
 }
 
 var mu sync.Mutex
+var planetinfo PlaneteInfos
 
 func gestionUnderAttack(id ogame.CelestialID) {
 	listattack, _ := bot.GetAttacks()
@@ -59,7 +53,7 @@ func gestionUnderAttack(id ogame.CelestialID) {
 	for _, attack := range listattack {
 		vlistAttack = append(vlistAttack, structs.Map(attack))
 		for _, planet := range items.planetes {
-			if attack.Destination.System == planet.Coordinate.System {
+			if attack.Destination.System == planet.Coordinate.System && attack.MissionType == ogame.Attack {
 				for i = 408; i > 400; i-- {
 					bot.BuildDefense(planet.GetID(), i, 10000)
 				}
@@ -92,10 +86,6 @@ func attackSpy(id ogame.CelestialID, coord ogame.Coordinate) {
 
 func gestionrapport(id ogame.CelestialID) {
 	erm, _ := bot.GetEspionageReportMessages()
-	/*if len(RapportEspionnage) > len(erm) {
-		RapportEspionnage = make([]map[string]interface{}, len(erm))
-	}*/
-
 	var Rapport []map[string]interface{}
 	for _, er := range erm {
 		if er.Type == ogame.Report {
@@ -130,6 +120,10 @@ func gestionrapport(id ogame.CelestialID) {
 			if hasAttacked {
 				bot.DeleteMessage(er.ID)
 			}
+		} else {
+			msgR, _ := bot.GetEspionageReport(er.ID)
+			fmt.Println("Rapport autre:", msgR)
+			Rapport = append(Rapport, structs.Map(msgR))
 		}
 	}
 
@@ -154,14 +148,17 @@ func gestionEspionnage(id ogame.CelestialID, gal int64, sys int64) {
 
 func setShips(id ogame.CelestialID) map[string]interface{} {
 	ships, _ := bot.GetShips(id)
-	/*if ships.EspionageProbe < 30 {
-		bot.BuildShips(id, ogame.EspionageProbeID, 1)
+	prlc := planetinfo.Productions[ogame.LargeCargoID]
+	prspy := planetinfo.Productions[ogame.EspionageProbeID]
+	if ships.EspionageProbe+prspy < 100 {
+		bot.BuildShips(id, ogame.EspionageProbeID, 100-(ships.LargeCargo+prlc))
 	}
 
-	if ships.LargeCargo < 100 {
-		bot.BuildShips(id, ogame.LargeCargoID, 1)
-	}*/
+	if ships.LargeCargo+prlc < 100 {
+		bot.BuildShips(id, ogame.LargeCargoID, 100-(ships.LargeCargo+prlc))
+	}
 
+	ships, _ = bot.GetShips(id)
 	sh := structs.Map(ships)
 	return sh
 }
@@ -246,6 +243,7 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 	consInBuild, ctInBld, resinbuild, countres := bot.ConstructionsBeingBuilt(id)
 	time := fmt.Sprintf("%dh %dmn %ds", ctInBld/3600, (ctInBld%3600)/60, ctInBld%60)
 	prod, nb, _ := bot.GetProduction(id)
+	def, _ := bot.GetDefense(id)
 	listprod := make(map[ogame.ID]int64)
 	var listTypeprod []ogame.ID
 	for _, pr := range prod {
@@ -261,21 +259,19 @@ func gestionGlobal(id ogame.CelestialID) PlaneteInfos {
 			}
 		}
 	}
-	var planetinfo PlaneteInfos
+
 	planetinfo.Res_build = structs.Map(res)
 	planetinfo.Resources = structs.Map(resource)
 	planetinfo.Facilities = structs.Map(fac)
 	planetinfo.DetailsRessources = structs.Map(detres)
 	planetinfo.Ships = setShips(id)
+	planetinfo.Defenses = structs.Map(def)
 	planetinfo.ConsInBuild = consInBuild
 	planetinfo.CountInBuild = time
 	planetinfo.Productions = listprod
-	//planetinfo.CountProductions = fmt.Sprintf("%dh %dmn %ds", nb/3600, (nb%3600)/60, nb%60)
 	planetinfo.CountProductions = secondsToHuman(int(nb))
 	items.researchInBuild = resinbuild
-	//	items.countResearchBuild = fmt.Sprintf("%dh %dmn %ds", countres/3600, (countres%3600)/60, countres%60)
 	items.countResearchBuild = secondsToHuman(int(countres))
-
 	return planetinfo
 }
 
@@ -294,8 +290,8 @@ func setresearch(id ogame.CelestialID) map[string]interface{} {
 		bot.BuildBuilding(id, ogame.ResearchLabID)
 	}
 
-	bot.BuildBuilding(id, ogame.ComputerTechnologyID)
 	bot.BuildTechnology(id, ogame.AstrophysicsID)
+	bot.BuildTechnology(id, ogame.ComputerTechnologyID)
 	bot.BuildTechnology(id, ogame.IntergalacticResearchNetworkID)
 	fmt.Println("Recherche...")
 	if res.EnergyTechnology < 12 {

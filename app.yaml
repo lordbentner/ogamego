@@ -1,6 +1,4 @@
-runtime: go113
+runtime: go115
 automatic_scaling:
   min_instances: 1
   min_idle_instances: 1
-
-threadsafe: true

@@ -1,22 +1,4 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <link rel="stylesheet" href="/css/bootstrap-4.3.1-dist/css/bootstrap.css">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel = "icon" href = "/images/icon.jpg" type = "image/x-icon">
-    <title>Ogame Bot</title>
-</head>
-<body>
-   <nav class="nav nav-pills nav-pill font-weight-bold bg-info justify-content-between">
-		<a class="nav-item nav-link" href="/databoard">Tableau de bord</a>
-		<a class="nav-item nav-link" href="/rapports">Rapport</a>
-		<a class="nav-item nav-link active" href="/flottes">Flottes info</a>
-        <span class="navbar-text">Temps de connexion: {{.time_con}}</span>
-        <span class="navbar-text">{{.point}} points</span>
-        <span class="navbar-text text-lg-right">Connecté en tant que {{.user}}</span>
-        <a class="navbar-brand nav-link bg-danger" href="/quit">Quitter</a>
-	</nav>
+{{template "header" .}}
     <div class="card text-center border border-primary flottes d-flex flex-column align-items-center">
         <div class="card-header text-white"><h2>Nombre et infos des flottes en cours: {{len .flottes}}</h2></div>
         <div class="card-body">          
@@ -41,8 +23,8 @@
             </thead>
             <tbody>
                 {{range $ind, $value := .flottes}}              
-                    {{if and (lt $ind $.lElem) (ge $ind $.fElem)}}
-                    <tr><td>{{$ind}}</td>
+                    {{if and (lt $ind (mul $.Page 5)) (ge $ind (mul (sub $.Page 1) 5))}}
+                    <tr><td>{{add $ind 1}}</td>
                         {{range $key, $val := $value}}
                             {{if eq (printf "%T" $val) "map[string]interface {}"}}		
                                     <td>{{range $keys, $vals := $val}}

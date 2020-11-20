@@ -1,0 +1,21 @@
+{{define "header"}}
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" href="/css/bootstrap-4.3.1-dist/css/bootstrap.css">
+        <link rel="stylesheet" href="/css/style.css">
+        <link rel = "icon" href = "/images/icon.jpg" type = "image/x-icon"> 
+        <title>Ogame Bot</title>
+    </head>
+    <body>
+        <nav class="nav nav-pills nav-pill justify-content-between font-weight-bold bg-info navbar-expand-lg">
+            <a class="navbar-brand nav-link {{with .planetinfos}} active  {{end}}" href="/databoard">Tableau de bord</a>
+            <a class="navbar-brand nav-link {{with .spy}} active {{end}}" href="/rapports">Rapport</a>
+            <a class="navbar-brand nav-link {{with .flottes }} active {{end}}" href="/flottes">Flottes info</a>	
+            <span class="navbar-text text-lg-right">Temps de connexion: {{.time_con}}</span>
+            <span class="navbar-text text-lg-right">{{.point}} points</span>
+            <span class="navbar-text text-lg-right">Connecté en tant que {{.user}}</span>
+            <a class="navbar-brand nav-link bg-danger" href="/quit">Quitter</a>
+        </nav>
+{{end}}

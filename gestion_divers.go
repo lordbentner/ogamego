@@ -65,6 +65,8 @@ func getTimeInGame() (string, string) {
 	login := getJSONlogin()
 	if bot == nil {
 		return "Non Connecté!", ""
+	} else if !bot.IsLoggedIn() {
+		return "Non Connecté!", ""
 	}
 
 	currentTime := time.Now()
@@ -118,18 +120,6 @@ func launch() {
 		}
 		fl, _ := bot.GetFleets()
 		i := 0
-		if len(items.planetes) > len(items.facilities) {
-			items.facilities = make([]map[string]interface{}, len(items.planetes))
-			items.resources = make([]map[string]interface{}, len(items.planetes))
-			items.ships = make([]map[string]interface{}, len(items.planetes))
-			items.res_build = make([]map[string]interface{}, len(items.planetes))
-			items.detailsRessources = make([]map[string]interface{}, len(items.planetes))
-			items.consInBuild = make([]ogame.ID, len(items.planetes))
-			items.countInBuild = make([]string, len(items.planetes))
-			items.productions = make([]map[ogame.ID]int64, len(items.planetes))
-			items.countProductions = make([]string, len(items.planetes))
-		}
-
 		if len(items.fleets) < len(fl) {
 			items.fleets = make([]map[string]interface{}, len(fl))
 		}
@@ -150,21 +140,16 @@ func launch() {
 
 		for _, planete := range items.planetes {
 			id := ogame.CelestialID(planete.ID)
-			items.researchs = setresearch(id)
+			inter := bot.GetResearch().IntergalacticResearchNetwork
+			if i <= int(inter) {
+				items.researchs = setresearch(id)
+			}
+
 			gestionUnderAttack(id)
 			plinfo := gestionGlobal(id)
 			plinfo.Planetes = planete
 			items.planetinfos[i] = plinfo
-			items.facilities[i] = plinfo.Facilities
-			items.resources[i] = plinfo.Resources
-			items.res_build[i] = plinfo.Res_build
-			items.detailsRessources[i] = plinfo.DetailsRessources
-			items.consInBuild[i] = plinfo.ConsInBuild
-			items.countInBuild[i] = plinfo.CountInBuild
-			items.productions[i] = plinfo.Productions
-			items.countProductions[i] = plinfo.CountProductions
 			satProduction(planete.ID)
-			items.ships[i] = setShips(id)
 
 			if lastspy.System >= 500 {
 				lastspy.System = 1
@@ -174,9 +159,8 @@ func launch() {
 				lastspy.Galaxy = 1
 			}
 
-			fmt.Println("Vaisseaux:", items.ships[i])
-			comput := items.researchs["Computer"].(int64)
-			if len(fl) < int(comput) {
+			fmt.Println("Vaisseaux:", plinfo.Ships)
+			if len(fl) <= int(bot.GetResearch().ComputerTechnology) {
 				gestionEspionnage(id, lastspy.Galaxy, lastspy.System)
 				gestionrapport(id)
 				lastspy.System++

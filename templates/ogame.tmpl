@@ -1,22 +1,4 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <link rel="stylesheet" href="/css/bootstrap-4.3.1-dist/css/bootstrap.css">
-    <link rel="stylesheet" href="/css/style.css">
-	<link rel = "icon" href = "/images/icon.jpg" type = "image/x-icon"> 
-    <title>Ogame Bot</title>
-</head>
-<body>
-	<nav class="nav nav-pills nav-pill justify-content-between font-weight-bold bg-info navbar-expand-lg">
-		<a class="navbar-brand nav-link active" href="/databoard">Tableau de bord</a>
-		<a class="navbar-brand nav-link" href="/rapports">Rapport</a>
-		<a class="navbar-brand nav-link" href="/flottes">Flottes info</a>	
-		<span class="navbar-text text-lg-right">Temps de connexion: {{.time_con}}</span>
-		<span class="navbar-text text-lg-right">{{.point}} points</span>
-		<span class="navbar-text text-lg-right">Connecté en tant que {{.user}}</span>
-		<a class="navbar-brand nav-link bg-danger" href="/quit">Quitter</a>
-	</nav>
+	{{template "header" .}}
 	<div class="card border border-primary d-flex justify-content-center databoard">
 	<div class="card-title text-center text-white"><h4>niveau des recherches</h4></div>
 	<div class="card-body">
@@ -58,7 +40,7 @@
 				{{end}}
 			</tbody>
 		</table>
-		<table class="table table-ordered bg-transparent text-white font-weight-bold">
+		<table class="table table-ordered table-bordered bg-transparent text-white font-weight-bold">
 			<thead>
 				<th scope="col">Planetes</th>
 				<th scope="col">Ressources</th>
@@ -66,6 +48,7 @@
 				<th scope="col">Niveaux des installations</th>
 				<th scope="col">Construction en cours</th>
 				<th scope="col">Vaisseaux</th>
+				<th scope="col">Défenses</th>
 				<th scope="col">Production de Vaisseaux/Défenses en cours</th>
 			</thead>
 			<tbody>
@@ -75,7 +58,7 @@
 							<a href="#"><svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-caret-down-fill" fill="currentColor">
 								<path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
 							</svg></a>				
-							<h4>{{.Planetes.Name}}</h4>
+							<h4><u>{{.Planetes.Name}}</u></h4>
 							<p>{{.Planetes.Coordinate}}</p>
 							<p> {{.Planetes.Fields.Built}}/
 							{{.Planetes.Fields.Total}}</p>
@@ -98,6 +81,12 @@
 						</td>
 						<td>{{.ConsInBuild}} : {{.CountInBuild}}</td>	
 						<td>{{range $key, $val := .Ships}}
+								{{if ne $val 0}}
+									<p>{{$key}} : {{$val}}</p>
+								{{end}}
+							{{end}}
+						</td>
+						<td>{{range $key, $val := .Defenses}}
 								{{if ne $val 0}}
 									<p>{{$key}} : {{$val}}</p>
 								{{end}}

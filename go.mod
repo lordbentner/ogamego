@@ -14,6 +14,6 @@ require (
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/stretchr/stew v0.0.0-20130812190256-80ef0842b48b
-	golang.org/x/crypto v0.0.0-20201117144127-c1f2f97bffc9 // indirect
+	golang.org/x/crypto v0.1.0 // indirect
 	gopkg.in/macaron.v1 v1.4.0
 )
